@@ -115,12 +115,12 @@ const SignIn = () => {
                 className="w-full h-full object-contain"
               />
             </div>
-            <span className="text-2xl font-open-sans font-semibold text-gray-800">GROUP OF COMPANIES</span>
+            <span className="text-2xl font-serif text-gray-800">GROUP OF COMPANIES</span>
           </div>
           
           {/* Welcome Message */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            <h1 className="text-3xl font-semibold text-gray-800 mb-2">
               Hello, Welcome Back
             </h1>
             <p className="text-gray-600">
@@ -222,7 +222,7 @@ const SignIn = () => {
             
             {/* Toolbar */}
             <div className="flex space-x-2 mb-4">
-              {['Text', 'Email', 'Select', 'Checkbox'].map((tool, index) => (
+              {['Text', 'Number', 'Select', 'Checkbox'].map((tool, index) => (
                 <div
                   key={tool}
                   className={`px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 ${
