@@ -1,0 +1,103 @@
+Tech Stack
+⦁	Frontend: ReactJS + Tailwind CSS
+⦁	Backend: .NET 8
+⦁	Database: Microsoft SQL Server (MSSQL)
+
+Personas
+Admin User
+⦁	Manages overall application activities.
+⦁	Creates forms, assigns them to users.
+⦁	Reviews and approves/rejects submissions.
+⦁	Views analytics and statistics.
+
+Normal User
+⦁	Views assigned forms.
+⦁	Submits forms.
+⦁	Tracks approval status of submitted forms.
+
+User Stories by Role
+User Login and Role-Based Navigation
+As a user, I need to sign-in to the application, So that I can access either the Admin Dashboard or User Screen depending on my role.
+
+Acceptance Criteria:
+⦁	Login screen accepts email and password.
+⦁	On successful authentication:
+	- If role = Admin → Redirect to Admin Dashboard.
+	- If role = Normal User → Redirect to User Screen.
+⦁	Invalid credentials display appropriate error message.
+⦁	Session is maintained securely.
+⦁	Authentication is handled via .NET backend, with user roles stored in MSSQL.
+
+Admin Dashboard
+(Admin-only view with four primary sections: Dashboard, Forms Management (Create New Form, Edit Form, Delete Form), Approval/Reject Form Responses, Users)
+
+1. Dashboard Screen
+Purpose : To view key metrics and charts about form creation and submissions, So that I can track usage and monitor approval workflows.
+Display :
+⦁	Total number of forms created.
+⦁	Total number of submissions received.
+⦁	Approval Status Summary:
+	- Number of pending approvals.
+	- Number of approved items.
+	- Number of rejected items.
+⦁	Use visualizations (e.g., bar chart, pie chart).
+⦁	Data is retrieved via API from backend and displayed using ReactJS with Tailwind for UI.
+
+2. Forms Screen
+Purpose : To create forms, filter/search them, view form data in a table, and assign them to Normal Users, So that users can access and submit those forms.
+Features :
+⦁	A "Create New Form" button opens Form Builder to create new custom forms.
+⦁	Filter forms by name and status.
+⦁	Display table:
+	- Columns: Form Name, Status, Total Submissions, Created Date, Action
+⦁	In Action:
+	- Assign Normal Users to the form.
+	- Edit form.
+Backend Logic:
+⦁	Form metadata stored in MSSQL (Form Name, Creator, Status).
+⦁	Access Control List (ACL) maintained in database to map Users to Forms.
+
+3. Approvals Screen
+Purpose : To see all form submissions requiring approval, So that I can approve or reject them and add comments.
+Features :
+⦁	Filter by Form Name and Status (Pending, Approved, Rejected).
+⦁	Display table:
+	- Columns: Submission ID, Form Name, Submitted By, Submission Date, Status
+⦁	Action buttons:
+	- View submitted form details.
+	- Approve/Reject with optional comment.
+⦁	Upon action:
+	- Status is updated.
+	- Email is sent to submitting user with status + comment.
+
+4. Users Screen
+Purpose : To manage users
+Features :
+⦁	View user list
+⦁	Assign or revoke access to forms
+⦁	Manage user roles
+
+
+Normal User Screen
+Purpose : To view forms assigned to me and track the status of my submissions, So that I can complete required forms and monitor approvals.
+Features :
+⦁	Filter by form name and status.
+⦁	Display submitted forms of previous submissions:
+	- Form Name, Submitted Date, Status
+⦁	View assigned forms and open links to submit data.
+⦁	Email notification sent after form approval/rejection.
+Submission Process :
+⦁	User opens assigned form link.
+⦁	Submits data via dynamic form (rendered from backend form schema).
+⦁	Data stored in backend with reference to user ID and form ID.
+⦁	Triggers email to admin for review.
+
+Email Notifications
+As a user, I want to receive email notifications after form approval or rejection, So that I stay informed about submission results.
+⦁	After admin approves or rejects a form:
+	- Send email to the submitting user.
+	- Email includes:
+		- Form name
+		- Status (Approved/Rejected)
+		- Admin comment (if any)
+Email system can be integrated using **SMTP** or third-party providers like **SendGrid**, triggered from backend logic.
