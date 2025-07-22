@@ -65,40 +65,23 @@ const SignIn = () => {
     setIsLoading(true);
     setError('');
     
-    try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        }),
-      });
+    // Simulate API call delay
+    setTimeout(() => {
+      // Mock login - for demo purposes, any valid email/password will work
+      const mockUser = {
+        email: formData.email,
+        role: 'Admin',
+        name: 'Admin User'
+      };
       
-      const data = await response.json();
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify(mockUser));
       
-      if (response.ok) {
-        // Store user data in localStorage or sessionStorage
-        localStorage.setItem('user', JSON.stringify(data));
-        
-        // Navigate based on user role
-        if (data.role === 'Admin') {
-          navigate('/admin-dashboard');
-        } else if (data.role === 'Normal User') {
-          navigate('/user-home');
-        } else {
-          setError('Invalid user role');
-        }
-      } else {
-        setError(data.message || 'Invalid credentials');
-      }
-    } catch (error) {
-      setError('Network error. Please try again.');
-    } finally {
+      // Navigate to admin dashboard
+      navigate('/admin-dashboard');
+      
       setIsLoading(false);
-    }
+    }, 1000);
   };
 
   return (
