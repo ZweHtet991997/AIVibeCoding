@@ -1,5 +1,5 @@
 ﻿using FormBuilderApi.Models;
-using FormBuilderApi.Services;
+using FormBuilderApi.Services.AuthServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FormBuilderApi.Controllers

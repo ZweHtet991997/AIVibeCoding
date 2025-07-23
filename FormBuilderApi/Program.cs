@@ -1,6 +1,7 @@
 using FormBuilderApi.Entities;
 using FormBuilderApi.Models;
-using FormBuilderApi.Services;
+using FormBuilderApi.Services.AuthServices;
+using FormBuilderApi.Services.Dashboard;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -42,6 +43,7 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 var app = builder.Build();
 
