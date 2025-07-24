@@ -1,13 +1,22 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import SummaryCards from './dashboard/SummaryCards';
 import StatisticsChart from './dashboard/StatisticsChart';
 import ApprovalStatusChart from './dashboard/ApprovalStatusChart';
 import RecentSubmissionsTable from './dashboard/RecentSubmissionsTable';
+import FormsScreen from './dashboard/FormsScreen';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeMenu, setActiveMenu] = useState('Dashboard');
+
+  // Set initial menu from navigation state
+  useEffect(() => {
+    if (location.state && location.state.activeMenu) {
+      setActiveMenu(location.state.activeMenu);
+    }
+  }, [location.state]);
 
   const menuItems = [
     { 
@@ -126,8 +135,13 @@ const AdminDashboard = () => {
             </div>
           )}
 
+          {/* Forms Screen Content */}
+          {activeMenu === 'Forms' && (
+            <FormsScreen />
+          )}
+
           {/* Other Menu Content */}
-          {activeMenu !== 'Dashboard' && (
+          {activeMenu !== 'Dashboard' && activeMenu !== 'Forms' && (
             <div className="bg-dashboard-cardBg rounded-lg shadow p-6">
               <h2 className="text-xl font-semibold text-dashboard-bodyText mb-4">
                 {activeMenu} Management
