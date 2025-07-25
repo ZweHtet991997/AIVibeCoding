@@ -4,6 +4,7 @@ import SignIn from './components/SignIn';
 import AdminDashboard from './components/AdminDashboard';
 import UserHome from './components/UserHome';
 import FormBuilderScreen from './components/dashboard/forms/FormBuilderScreen';
+import BIMBot from './components/BIMBot';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/form-builder/:formId" element={<FormBuilderScreen />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <BIMBot />
       </div>
     </Router>
   );
