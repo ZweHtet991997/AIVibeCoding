@@ -6,6 +6,7 @@ import ApprovalStatusChart from './dashboard/ApprovalStatusChart';
 import RecentSubmissionsTable from './dashboard/RecentSubmissionsTable';
 import FormsScreen from './dashboard/FormsScreen';
 import ApprovalsScreen from './dashboard/ApprovalsScreen';
+import UserListScreen from './dashboard/UserListScreen';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -146,8 +147,13 @@ const AdminDashboard = () => {
             <ApprovalsScreen />
           )}
 
+          {/* Users Screen Content */}
+          {activeMenu === 'Users' && (
+            <UserListScreen />
+          )}
+
           {/* Other Menu Content */}
-          {activeMenu !== 'Dashboard' && activeMenu !== 'Forms' && activeMenu !== 'Approvals' && (
+          {activeMenu !== 'Dashboard' && activeMenu !== 'Forms' && activeMenu !== 'Approvals' && activeMenu !== 'Users' && (
             <div className="bg-dashboard-cardBg rounded-lg shadow p-6">
               <h2 className="text-xl font-semibold text-dashboard-bodyText mb-4">
                 {activeMenu} Management
