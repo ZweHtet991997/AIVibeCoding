@@ -73,9 +73,10 @@ Features :
 4. Users Screen
 Purpose : To manage users
 Features :
-⦁	View user list
+⦁	Filter by Username or Email and Status (Active, Inactive).
+⦁	Display table:
+	- Columns: Username, Email, Total Assigned Form, Status
 ⦁	Assign or revoke access to forms
-⦁	Manage user roles
 
 
 Normal User Screen

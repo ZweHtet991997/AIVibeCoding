@@ -42,21 +42,21 @@ const FormListTable = ({ forms, onEdit, onAssignUsers, onDelete }) => {
               <td className="py-4 px-4">
                 <div className="flex gap-2">
                   <button
-                    className="flex items-center gap-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded text-xs font-medium"
+                    className="flex items-center gap-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded text-xs font-medium"
                     onClick={() => onAssignUsers(form)}
                   >
                     {UserPlusIcon}
                     Assign Users
                   </button>
                   <button
-                    className="flex items-center gap-1.5 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-3 py-1 rounded text-xs font-medium"
+                    className="flex items-center gap-1.5 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-3 py-2 rounded text-xs font-medium"
                     onClick={() => onEdit(form)}
                   >
                     {PencilSquareIcon}
                     Edit
                   </button>
                   <button
-                    className="flex items-center gap-1.5 bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded text-xs font-medium"
+                    className="flex items-center gap-1.5 bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded text-xs font-medium"
                     onClick={() => onDelete(form.id)}
                   >
                     {TrashIcon}

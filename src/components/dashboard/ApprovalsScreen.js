@@ -164,17 +164,17 @@ const ApprovalsScreen = () => {
                   <td className="py-4 px-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                       sub.status === 'Approved'
-                        ? 'bg-dashboard-approved text-white'
+                        ? 'bg-green-100 text-green-800'
                         : sub.status === 'Rejected'
-                        ? 'bg-dashboard-rejected text-white'
-                        : 'bg-dashboard-pending text-gray-800'
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-yellow-100 text-yellow-800'
                     }`}>
                       {sub.status}
                     </span>
                   </td>
                   <td className="py-4 px-4">
                     <button
-                      className="flex items-center gap-1 bg-primary-600 hover:bg-primary-700 text-white px-4 py-1.5 rounded text-xs font-medium shadow transition-colors duration-150"
+                      className="flex items-center gap-1 bg-blue-100 hover:bg-blue-300 text-blue-800 px-4 py-1.5 rounded text-xs font-medium shadow transition-colors duration-150"
                       onClick={() => handleView(sub)}
                     >
                       {EyeIcon}
