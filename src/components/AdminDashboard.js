@@ -7,6 +7,7 @@ import RecentSubmissionsTable from './dashboard/RecentSubmissionsTable';
 import FormsScreen from './dashboard/FormsScreen';
 import ApprovalsScreen from './dashboard/ApprovalsScreen';
 import UserListScreen from './dashboard/UserListScreen';
+import { logout, getUserName } from '../utils/auth';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -56,7 +57,7 @@ const AdminDashboard = () => {
   ];
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    logout();
     navigate('/');
   };
 
@@ -117,7 +118,7 @@ const AdminDashboard = () => {
               {activeMenu}
             </h1>
             <p className="text-gray-600 mt-2">
-              Welcome back! Here's what's happening with your forms and submissions.
+              Welcome back, {getUserName()}! Here's what's happening with your forms and submissions.
             </p>
           </div>
 

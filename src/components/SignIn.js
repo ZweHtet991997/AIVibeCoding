@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import apiConfig from '../config';
+import { isTokenExpired, getUser } from '../utils/auth';
 
 const SignIn = () => {
   const navigate = useNavigate();
@@ -19,6 +21,26 @@ const SignIn = () => {
     }, 3000);
     return () => clearInterval(interval);
   }, []);
+
+  // Check if user is already authenticated and redirect if so
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const user = getUser();
+    
+    if (token && user && !isTokenExpired(token)) {
+      try {
+        if (user.userRole === 'Admin') {
+          navigate('/admin-dashboard');
+        } else {
+          navigate('/user-home');
+        }
+      } catch (error) {
+        // If user data is corrupted, clear it
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
+    }
+  }, [navigate]);
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -59,26 +81,43 @@ const SignIn = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!validateForm()) return;
-    
     setIsLoading(true);
     setError('');
-    
-    // Simulate API call delay
-    setTimeout(() => {
-      // Store user data in localStorage
+    try {
+      const response = await fetch(`${apiConfig.baseUrl}/api/Auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error('Invalid email or password');
+      }
+      const data = await response.json();
+      // Store token and user info
+      localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify({
-        email: formData.email,
-        role: 'Admin',
-        name: 'Admin User'
+        userId: data.userId,
+        userName: data.userName,
+        userRole: data.userRole,
+        email: data.email,
       }));
-      
-      // Navigate to admin dashboard
-      navigate('/admin-dashboard');
-      
+      // Navigate based on role
+      if (data.userRole === 'Admin') {
+        navigate('/admin-dashboard');
+      } else {
+        navigate('/user-home');
+      }
+    } catch (err) {
+      setError(err.message || 'Sign in failed');
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
