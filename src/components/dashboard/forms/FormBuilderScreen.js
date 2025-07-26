@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-const mockFormData = {
-  1: { name: 'Employee Onboarding', fields: [{ label: 'Full Name', type: 'text' }] },
-  2: { name: 'Leave Request', fields: [{ label: 'Start Date', type: 'date' }] },
-  3: { name: 'Expense Report', fields: [{ label: 'Amount', type: 'number' }] },
-};
-
 const FormBuilderScreen = () => {
   const { formId } = useParams();
   const navigate = useNavigate();
@@ -16,11 +10,18 @@ const FormBuilderScreen = () => {
   useEffect(() => {
     if (formId) {
       setLoading(true);
-      // Simulate API call
+      // Empty form data
+      const emptyFormData = {
+        id: formId,
+        name: '',
+        fields: []
+      };
+      
+      // Simulate API call delay
       setTimeout(() => {
-        setForm(mockFormData[formId] || null);
+        setForm(emptyFormData);
         setLoading(false);
-      }, 600);
+      }, 1000);
     } else {
       setForm({ name: '', fields: [] });
       setLoading(false);

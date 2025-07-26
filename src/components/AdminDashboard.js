@@ -56,6 +56,7 @@ const AdminDashboard = () => {
   ];
 
   const handleLogout = () => {
+    localStorage.removeItem('user');
     navigate('/');
   };
 
@@ -165,6 +166,7 @@ const AdminDashboard = () => {
           )}
         </div>
       </div>
+
     </div>
   );
 };

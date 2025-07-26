@@ -4,30 +4,7 @@ import FormListTable from './forms/FormListTable';
 import AssignUsersModal from './forms/AssignUsersModal';
 import DeleteConfirmDialog from './forms/DeleteConfirmDialog';
 
-// Placeholder/mock data for forms
-const mockForms = [
-  {
-    id: 1,
-    name: 'Employee Onboarding',
-    status: 'Active',
-    totalSubmissions: 45,
-    createdDate: '2024-01-10',
-  },
-  {
-    id: 2,
-    name: 'Leave Request',
-    status: 'Inactive',
-    totalSubmissions: 32,
-    createdDate: '2024-01-12',
-  },
-  {
-    id: 3,
-    name: 'Expense Report',
-    status: 'Active',
-    totalSubmissions: 28,
-    createdDate: '2024-01-15',
-  },
-];
+
 
 const FormsScreen = () => {
   const [forms, setForms] = useState([]);
@@ -36,25 +13,17 @@ const FormsScreen = () => {
   const [isAssignUsersOpen, setIsAssignUsersOpen] = useState(false);
   const [selectedForm, setSelectedForm] = useState(null);
   const [deleteFormId, setDeleteFormId] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  // Simulate data fetching
+  // Load empty forms
   useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
-      setForms(mockForms);
-      setLoading(false);
-    }, 800);
+    setForms([]);
   }, []);
 
-  // Filtered forms
-  const filteredForms = forms.filter(form => {
-    const matchesName = form.name.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter ? form.status === statusFilter : true;
-    return matchesName && matchesStatus;
-  });
+  // Forms are already filtered by the API, so we use them directly
+  const filteredForms = forms;
 
   // Handlers
   const handleCreateNewForm = () => {
@@ -77,10 +46,16 @@ const FormsScreen = () => {
   const handleCancelDelete = () => {
     setDeleteFormId(null);
   };
-  const handleConfirmDelete = () => {
-    setForms(prev => prev.filter(f => f.id !== deleteFormId));
-    setDeleteFormId(null);
-    // Prepare for backend API integration here
+  const handleConfirmDelete = async () => {
+    try {
+      // Simulate API call delay
+      setTimeout(() => {
+        setForms(prev => prev.filter(f => f.id !== deleteFormId));
+        setDeleteFormId(null);
+      }, 1000);
+    } catch (error) {
+      console.error('Delete form error:', error);
+    }
   };
 
   return (

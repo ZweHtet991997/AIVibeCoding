@@ -1,21 +1,24 @@
-import React, { useState, useMemo } from 'react';
-
-// Mock user data (should be passed as prop or fetched in real app)
-const mockUsers = [
-  { id: 1, username: 'johndoe', email: 'john@example.com', role: 'Admin', status: 'Active' },
-  { id: 2, username: 'janedoe', email: 'jane@example.com', role: 'Normal User', status: 'Inactive' },
-  { id: 3, username: 'bobsmith', email: 'bob@example.com', role: 'Normal User', status: 'Active' },
-  { id: 4, username: 'alicew', email: 'alice@example.com', role: 'Admin', status: 'Inactive' },
-];
+import React, { useState, useMemo, useEffect } from 'react';
 
 const AssignUsersModal = ({ open, onClose, form, assignedUserIds = [], onSave }) => {
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(assignedUserIds);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+
+
+  // Load empty users
+  useEffect(() => {
+    if (open) {
+      setUsers([]);
+    }
+  }, [open]);
 
   // Only active users
   const activeUsers = useMemo(() =>
-    mockUsers.filter(u => u.status === 'Active'),
-    []
+    users.filter(u => u.status === 'Active'),
+    [users]
   );
 
   // Filtered by search

@@ -47,18 +47,14 @@ const BIMBot = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/chatbot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input })
-      });
-      if (!res.ok) throw new Error('API error');
-      const data = await res.json();
-      setMessages(prev => [...prev, { sender: 'bot', text: data.reply || '...' }]);
+      // Simulate API call delay
+      setTimeout(() => {
+        setMessages(prev => [...prev, { sender: 'bot', text: 'This feature is not yet implemented.' }]);
+        setLoading(false);
+      }, 1000);
     } catch {
       setMessages(prev => [...prev, { sender: 'bot', text: 'Something went wrong. Please try again.' }]);
       setError('API error');
-    } finally {
       setLoading(false);
     }
   };
@@ -95,16 +91,16 @@ const BIMBot = () => {
         {/* Glassmorphism/neumorphism style */}
         <div className="rounded-2xl shadow-2xl bg-white bg-opacity-80 backdrop-blur-md border border-gray-200 flex flex-col overflow-hidden animate-fadeInUp" style={{ boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)' }}>
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-white bg-opacity-60">
+          <div className="flex items-center justify-between px-5 py-2 border-b border-gray-100 bg-white bg-opacity-60">
             <div className="flex items-center gap-2">
-            <span className="w-14 h-14 flex items-center justify-center">
+            <span className="w-12 h-12 flex items-center justify-center">
           <img
             src="/assets/images/robot-assistant.png"
             alt="Open BIM Bot"
-            className="w-10 h-10 object-contain"
+            className="w-9 h-9 object-contain"
           />
         </span>
-              <span className="font-bold text-dashboard-bodyText text-lg tracking-tight drop-shadow-sm">{BOT_NAME}</span>
+              <span className="font-bold text-dashboard-bodyText text-md tracking-tight drop-shadow-sm">{BOT_NAME}</span>
             </div>
             <button className="text-gray-400 hover:text-gray-600 transition-colors" onClick={() => setOpen(false)} aria-label="Close BIM Bot">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>

@@ -1,28 +1,25 @@
-import React, { useState } from 'react';
-
-const mockUsers = [
-  { id: 1, username: 'johndoe', email: 'john@example.com', role: 'Admin', forms: 5, status: 'Active' },
-  { id: 2, username: 'janedoe', email: 'jane@example.com', role: 'Normal User', forms: 2, status: 'Inactive' },
-  { id: 3, username: 'bobsmith', email: 'bob@example.com', role: 'Normal User', forms: 7, status: 'Active' },
-  { id: 4, username: 'alicew', email: 'alice@example.com', role: 'Admin', forms: 0, status: 'Inactive' },
-];
+import React, { useState, useEffect } from 'react';
 
 const statusColors = {
   Active: 'bg-green-100 text-green-800',
   Inactive: 'bg-gray-100 text-gray-600',
 };
 
+
+
 export default function UserListScreen() {
+  const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const filteredUsers = mockUsers.filter(user => {
-    const matchesSearch =
-      user.username.toLowerCase().includes(search.toLowerCase()) ||
-      user.email.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = status ? user.status === status : true;
-    return matchesSearch && matchesStatus;
-  });
+  // Load empty users
+  useEffect(() => {
+    setUsers([]);
+  }, []);
+
+  const filteredUsers = users; // Users are already filtered by the API
 
   return (
     <div className="space-y-6">

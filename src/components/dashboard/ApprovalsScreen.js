@@ -18,45 +18,9 @@ const XIcon = (
   </svg>
 );
 
-// Mock data for submissions
-const mockSubmissions = [
-  {
-    id: 'SUB-001',
-    formName: 'Employee Onboarding',
-    submittedBy: 'John Smith',
-    submissionDate: '2024-01-15',
-    status: 'Pending',
-    data: { Name: 'John Smith', Department: 'HR', StartDate: '2024-02-01' },
-    comment: '',
-  },
-  {
-    id: 'SUB-002',
-    formName: 'Leave Request',
-    submittedBy: 'Sarah Johnson',
-    submissionDate: '2024-01-14',
-    status: 'Approved',
-    data: { Name: 'Sarah Johnson', LeaveType: 'Sick', Days: 2 },
-    comment: 'Approved. Get well soon!',
-  },
-  {
-    id: 'SUB-003',
-    formName: 'Expense Report',
-    submittedBy: 'Mike Davis',
-    submissionDate: '2024-01-13',
-    status: 'Rejected',
-    data: { Name: 'Mike Davis', Amount: 120, Reason: 'Travel' },
-    comment: 'Missing receipt.',
-  },
-  {
-    id: 'SUB-004',
-    formName: 'IT Support Request',
-    submittedBy: 'Lisa Wilson',
-    submissionDate: '2024-01-12',
-    status: 'Pending',
-    data: { Name: 'Lisa Wilson', Issue: 'Laptop not booting' },
-    comment: '',
-  },
-];
+
+
+
 
 const statusOptions = ['Pending', 'Approved', 'Rejected'];
 
@@ -68,11 +32,13 @@ const ApprovalsScreen = () => {
   const [actionComment, setActionComment] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const tableRef = useRef(null);
 
-  // Simulate fetching data
+  // Load empty submissions
   useEffect(() => {
-    setSubmissions(mockSubmissions);
+    setSubmissions([]);
   }, []);
 
   // Maintain scroll position after modal close
@@ -82,12 +48,8 @@ const ApprovalsScreen = () => {
     }
   }, [modalOpen, scrollPosition]);
 
-  // Filtered submissions
-  const filteredSubmissions = submissions.filter((sub) => {
-    const matchesForm = sub.formName.toLowerCase().includes(filters.formName.toLowerCase());
-    const matchesStatus = filters.status ? sub.status === filters.status : true;
-    return matchesForm && matchesStatus;
-  });
+  // Submissions are already filtered by the API, so we use them directly
+  const filteredSubmissions = submissions;
 
   // Open detail modal
   const handleView = (submission) => {
@@ -98,19 +60,26 @@ const ApprovalsScreen = () => {
   };
 
   // Approve/Reject action
-  const handleAction = (status) => {
+  const handleAction = async (status) => {
     setActionLoading(true);
-    setTimeout(() => {
-      setSubmissions((prev) =>
-        prev.map((sub) =>
-          sub.id === selectedSubmission.id
-            ? { ...sub, status, comment: actionComment }
-            : sub
-        )
-      );
-      setModalOpen(false);
+    try {
+      // Simulate API call delay
+      setTimeout(() => {
+        // Update the submission in the list
+        setSubmissions((prev) =>
+          prev.map((sub) =>
+            sub.id === selectedSubmission.id
+              ? { ...sub, status, comment: actionComment }
+              : sub
+          )
+        );
+        setModalOpen(false);
+        setActionLoading(false);
+      }, 1000);
+    } catch (error) {
+      console.error('Action error:', error);
       setActionLoading(false);
-    }, 800); // Simulate API call
+    }
   };
 
   return (

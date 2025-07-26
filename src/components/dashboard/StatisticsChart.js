@@ -1,20 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+
+
 
 const StatisticsChart = () => {
-  const data = [
-    { month: 'Jan', formsCreated: 45, submissions: 120 },
-    { month: 'Feb', formsCreated: 52, submissions: 135 },
-    { month: 'Mar', formsCreated: 48, submissions: 110 },
-    { month: 'Apr', formsCreated: 61, submissions: 145 },
-    { month: 'May', formsCreated: 55, submissions: 130 },
-    { month: 'Jun', formsCreated: 67, submissions: 160 },
-    { month: 'Jul', formsCreated: 58, submissions: 140 },
-    { month: 'Aug', formsCreated: 72, submissions: 175 },
-    { month: 'Sep', formsCreated: 65, submissions: 155 },
-    { month: 'Oct', formsCreated: 78, submissions: 185 },
-    { month: 'Nov', formsCreated: 70, submissions: 165 },
-    { month: 'Dec', formsCreated: 85, submissions: 200 }
-  ];
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Load empty data
+  useEffect(() => {
+    setData([]);
+  }, []);
 
   const maxValue = Math.max(...data.map(d => Math.max(d.formsCreated, d.submissions)));
 
@@ -29,62 +25,73 @@ const StatisticsChart = () => {
         </p>
       </div>
 
-      <div className="space-y-4">
-        {/* Legend */}
-        <div className="flex items-center space-x-6 text-sm">
-          <div className="flex items-center">
-            <div className="w-4 h-4 bg-dashboard-formsCreated rounded mr-2"></div>
-            <span className="text-dashboard-bodyText">Forms Created</span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-4 h-4 bg-dashboard-submissions rounded mr-2"></div>
-            <span className="text-dashboard-bodyText">Submissions</span>
-          </div>
+      {loading ? (
+        <div className="flex justify-center items-center h-32">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <span className="ml-4 text-primary-600 font-medium">Loading statistics...</span>
         </div>
+      ) : error ? (
+        <div className="text-red-600 text-center py-8">{error}</div>
+      ) : data.length === 0 ? (
+        <div className="text-gray-500 text-center py-8">No statistics available.</div>
+      ) : (
+        <div className="space-y-4">
+          {/* Legend */}
+          <div className="flex items-center space-x-6 text-sm">
+            <div className="flex items-center">
+              <div className="w-4 h-4 bg-dashboard-formsCreated rounded mr-2"></div>
+              <span className="text-dashboard-bodyText">Forms Created</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-4 h-4 bg-dashboard-submissions rounded mr-2"></div>
+              <span className="text-dashboard-bodyText">Submissions</span>
+            </div>
+          </div>
 
-        {/* Chart */}
-        <div className="relative h-64">
-          <div className="flex items-end justify-between h-full space-x-1">
-            {data.map((item, index) => (
-              <div key={index} className="flex-1 flex flex-col items-center space-y-1">
-                {/* Submissions Bar */}
-                <div className="w-full flex justify-center">
-                  <div
-                    className="w-3/4 bg-dashboard-submissions rounded-t"
-                    style={{
-                      height: `${(item.submissions / maxValue) * 200}px`
-                    }}
-                  ></div>
+          {/* Chart */}
+          <div className="relative h-64">
+            <div className="flex items-end justify-between h-full space-x-1">
+              {data.map((item, index) => (
+                <div key={index} className="flex-1 flex flex-col items-center space-y-1">
+                  {/* Submissions Bar */}
+                  <div className="w-full flex justify-center">
+                    <div
+                      className="w-3/4 bg-dashboard-submissions rounded-t"
+                      style={{
+                        height: `${(item.submissions / maxValue) * 200}px`
+                      }}
+                    ></div>
+                  </div>
+                  
+                  {/* Forms Created Bar */}
+                  <div className="w-full flex justify-center">
+                    <div
+                      className="w-3/4 bg-dashboard-formsCreated rounded-t"
+                      style={{
+                        height: `${(item.formsCreated / maxValue) * 200}px`
+                      }}
+                    ></div>
+                  </div>
+                  
+                  {/* Month Label */}
+                  <span className="text-xs text-dashboard-headerText mt-2">
+                    {item.month}
+                  </span>
                 </div>
-                
-                {/* Forms Created Bar */}
-                <div className="w-full flex justify-center">
-                  <div
-                    className="w-3/4 bg-dashboard-formsCreated rounded-t"
-                    style={{
-                      height: `${(item.formsCreated / maxValue) * 200}px`
-                    }}
-                  ></div>
-                </div>
-                
-                {/* Month Label */}
-                <span className="text-xs text-dashboard-headerText mt-2">
-                  {item.month}
-                </span>
-              </div>
-            ))}
+              ))}
+            </div>
+          </div>
+
+          {/* Y-axis labels */}
+          <div className="flex justify-between text-xs text-dashboard-headerText px-2">
+            <span>0</span>
+            <span>{Math.round(maxValue * 0.25)}</span>
+            <span>{Math.round(maxValue * 0.5)}</span>
+            <span>{Math.round(maxValue * 0.75)}</span>
+            <span>{maxValue}</span>
           </div>
         </div>
-
-        {/* Y-axis labels */}
-        <div className="flex justify-between text-xs text-dashboard-headerText px-2">
-          <span>0</span>
-          <span>{Math.round(maxValue * 0.25)}</span>
-          <span>{Math.round(maxValue * 0.5)}</span>
-          <span>{Math.round(maxValue * 0.75)}</span>
-          <span>{maxValue}</span>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

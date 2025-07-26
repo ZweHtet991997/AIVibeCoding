@@ -67,15 +67,12 @@ const SignIn = () => {
     
     // Simulate API call delay
     setTimeout(() => {
-      // Mock login - for demo purposes, any valid email/password will work
-      const mockUser = {
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify({
         email: formData.email,
         role: 'Admin',
         name: 'Admin User'
-      };
-      
-      // Store user data in localStorage
-      localStorage.setItem('user', JSON.stringify(mockUser));
+      }));
       
       // Navigate to admin dashboard
       navigate('/admin-dashboard');
