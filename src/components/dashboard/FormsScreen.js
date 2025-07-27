@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import FormListTable from './forms/FormListTable';
 import AssignUsersModal from './forms/AssignUsersModal';
 import DeleteConfirmDialog from './forms/DeleteConfirmDialog';
+import { isAdmin } from '../../utils/auth';
+import { formsAPI } from '../../utils/api';
 
 
 
@@ -17,20 +19,47 @@ const FormsScreen = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  // Load empty forms
+  // Initialize forms screen
   useEffect(() => {
-    setForms([]);
+    const fetchForms = async () => {
+      try {
+        setLoading(true);
+        setError('');
+        
+        // Verify admin access
+        if (!isAdmin()) {
+          setError('Admin privileges required to view forms data.');
+          setLoading(false);
+          return;
+        }
+
+        // Fetch forms from API
+        const formsData = await formsAPI.getFormsList();
+        setForms(formsData);
+      } catch (error) {
+        console.error('Error fetching forms:', error);
+        setError(error.message || 'Failed to load forms. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchForms();
   }, []);
 
-  // Forms are already filtered by the API, so we use them directly
-  const filteredForms = forms;
+  // Filter forms based on search and status
+  const filteredForms = forms.filter(form => {
+    const matchesSearch = form.formName.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = !statusFilter || form.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   // Handlers
   const handleCreateNewForm = () => {
     navigate('/form-builder');
   };
   const handleEditForm = (form) => {
-    navigate(`/form-builder/${form.id}`);
+    navigate(`/form-builder/${form.formId}`);
   };
   const handleOpenAssignUsers = (form) => {
     setSelectedForm(form);
@@ -50,7 +79,7 @@ const FormsScreen = () => {
     try {
       // Simulate API call delay
       setTimeout(() => {
-        setForms(prev => prev.filter(f => f.id !== deleteFormId));
+        setForms(prev => prev.filter(f => f.formId !== deleteFormId));
         setDeleteFormId(null);
       }, 1000);
     } catch (error) {
@@ -99,9 +128,9 @@ const FormsScreen = () => {
             <span className="ml-4 text-primary-600 font-medium">Loading forms...</span>
           </div>
         ) : error ? (
-          <div className="text-red-600 text-center py-8">{error}</div>
-        ) : filteredForms.length === 0 ? (
-          <div className="text-gray-500 text-center py-8">No forms found.</div>
+          <div className="text-center py-8">
+            <div className="text-red-600 mb-2">{error}</div>
+          </div>
         ) : (
           <FormListTable
             forms={filteredForms}

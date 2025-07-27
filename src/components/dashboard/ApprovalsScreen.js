@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { approvalsAPI } from '../../utils/api';
 
 // Heroicons (outline)
 const EyeIcon = (
@@ -36,9 +37,40 @@ const ApprovalsScreen = () => {
   const [error, setError] = useState('');
   const tableRef = useRef(null);
 
-  // Load empty submissions
+  // Load form responses from API
+  const loadFormResponses = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await approvalsAPI.getFormResponses();
+      
+      // Transform API response to match table structure
+      const transformedData = response.map(item => ({
+        id: item.responseId,
+        formName: item.formName,
+        submittedBy: item.userName,
+        submissionDate: item.responseDate,
+        status: item.status,
+        comment: item.comment,
+        data: {
+          [item.fieldKey]: item.responseValue
+        },
+        // Store original API data for reference
+        originalData: item
+      }));
+      
+      setSubmissions(transformedData);
+    } catch (error) {
+      console.error('Error loading form responses:', error);
+      setError(error.message || 'Failed to load form responses');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load data when component mounts
   useEffect(() => {
-    setSubmissions([]);
+    loadFormResponses();
   }, []);
 
   // Maintain scroll position after modal close
@@ -48,8 +80,13 @@ const ApprovalsScreen = () => {
     }
   }, [modalOpen, scrollPosition]);
 
-  // Submissions are already filtered by the API, so we use them directly
-  const filteredSubmissions = submissions;
+  // Filter submissions based on form name and status
+  const filteredSubmissions = submissions.filter(submission => {
+    const matchesFormName = !filters.formName || 
+      submission.formName.toLowerCase().includes(filters.formName.toLowerCase());
+    const matchesStatus = !filters.status || submission.status === filters.status;
+    return matchesFormName && matchesStatus;
+  });
 
   // Open detail modal
   const handleView = (submission) => {
@@ -105,56 +142,77 @@ const ApprovalsScreen = () => {
         </select>
       </div>
 
+
+
       {/* Table */}
       <div ref={tableRef} className="bg-dashboard-cardBg rounded-lg shadow p-4 overflow-x-auto max-h-[60vh]">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-gray-200">
-              <th className="text-left py-3 px-4 text-dashboard-headerText font-medium">Submission ID</th>
-              <th className="text-left py-3 px-4 text-dashboard-headerText font-medium">Form Name</th>
-              <th className="text-left py-3 px-4 text-dashboard-headerText font-medium">Submitted By</th>
-              <th className="text-left py-3 px-4 text-dashboard-headerText font-medium">Submission Date</th>
-              <th className="text-left py-3 px-4 text-dashboard-headerText font-medium">Status</th>
-              <th className="text-left py-3 px-4 text-dashboard-headerText font-medium">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredSubmissions.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="text-center text-gray-500 py-8">No submissions found.</td>
+        {loading ? (
+          <div className="flex justify-center items-center h-32">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+            <span className="ml-4 text-primary-600 font-medium">Loading approvals...</span>
+          </div>
+        ) : error ? (
+          <div className="text-center py-8">
+            <div className="text-red-600 mb-2">{error}</div>
+            <button
+              onClick={loadFormResponses}
+              className="text-sm text-red-600 hover:text-red-500 font-medium"
+            >
+              Retry
+            </button>
+          </div>
+        ) : (
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-200">
+                <th className="text-left py-3 px-4 text-dashboard-headerText font-medium">Submission ID</th>
+                <th className="text-left py-3 px-4 text-dashboard-headerText font-medium">Form Name</th>
+                <th className="text-left py-3 px-4 text-dashboard-headerText font-medium">Submitted By</th>
+                <th className="text-left py-3 px-4 text-dashboard-headerText font-medium">Submission Date</th>
+                <th className="text-left py-3 px-4 text-dashboard-headerText font-medium">Status</th>
+                <th className="text-left py-3 px-4 text-dashboard-headerText font-medium">Action</th>
               </tr>
-            ) : (
-              filteredSubmissions.map((sub) => (
-                <tr key={sub.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-4 px-4 text-dashboard-bodyText font-medium">{sub.id}</td>
-                  <td className="py-4 px-4 text-dashboard-bodyText">{sub.formName}</td>
-                  <td className="py-4 px-4 text-dashboard-bodyText">{sub.submittedBy}</td>
-                  <td className="py-4 px-4 text-dashboard-bodyText">{new Date(sub.submissionDate).toLocaleDateString()}</td>
-                  <td className="py-4 px-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      sub.status === 'Approved'
-                        ? 'bg-green-100 text-green-800'
-                        : sub.status === 'Rejected'
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {sub.status}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <button
-                      className="flex items-center gap-1 bg-blue-100 hover:bg-blue-300 text-blue-800 px-4 py-1.5 rounded text-xs font-medium shadow transition-colors duration-150"
-                      onClick={() => handleView(sub)}
-                    >
-                      {EyeIcon}
-                      View
-                    </button>
+            </thead>
+            <tbody>
+              {filteredSubmissions.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center text-gray-500 py-8">
+                    {submissions.length === 0 ? 'No submissions found.' : 'No submissions match the current filters.'}
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                filteredSubmissions.map((sub) => (
+                  <tr key={sub.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-4 px-4 text-dashboard-bodyText font-medium">{sub.id}</td>
+                    <td className="py-4 px-4 text-dashboard-bodyText">{sub.formName}</td>
+                    <td className="py-4 px-4 text-dashboard-bodyText">{sub.submittedBy}</td>
+                    <td className="py-4 px-4 text-dashboard-bodyText">{new Date(sub.submissionDate).toLocaleDateString()}</td>
+                    <td className="py-4 px-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        sub.status === 'Approved'
+                          ? 'bg-green-100 text-green-800'
+                          : sub.status === 'Rejected'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {sub.status}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4">
+                      <button
+                        className="flex items-center gap-1 bg-blue-100 hover:bg-blue-300 text-blue-800 px-4 py-1.5 rounded text-xs font-medium shadow transition-colors duration-150"
+                        onClick={() => handleView(sub)}
+                      >
+                        {EyeIcon}
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Detail Modal */}
@@ -181,6 +239,10 @@ const ApprovalsScreen = () => {
                   <div>{selectedSubmission.submittedBy}</div>
                 </div>
                 <div>
+                  <div className="font-semibold">User Email:</div>
+                  <div>{selectedSubmission.originalData?.userEmail || 'N/A'}</div>
+                </div>
+                <div>
                   <div className="font-semibold">Submission Date:</div>
                   <div>{new Date(selectedSubmission.submissionDate).toLocaleDateString()}</div>
                 </div>
@@ -188,18 +250,21 @@ const ApprovalsScreen = () => {
                   <div className="font-semibold">Status:</div>
                   <div>{selectedSubmission.status}</div>
                 </div>
+                <div>
+                  <div className="font-semibold">Decision Date:</div>
+                  <div>{selectedSubmission.originalData?.decisionDate ? new Date(selectedSubmission.originalData.decisionDate).toLocaleDateString() : 'N/A'}</div>
+                </div>
               </div>
             </div>
             <div className="mb-4">
               <div className="font-semibold mb-2">Form Data:</div>
               <div className="bg-gray-50 border border-gray-200 rounded p-4 text-sm">
-                <ul>
-                  {Object.entries(selectedSubmission.data).map(([key, value]) => (
-                    <li key={key} className="mb-1">
-                      <span className="font-medium text-gray-700">{key}:</span> {value}
-                    </li>
-                  ))}
-                </ul>
+                <div className="mb-2">
+                  <span className="font-medium text-gray-700">Field:</span> {selectedSubmission.originalData?.fieldKey || 'N/A'}
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Response:</span> {selectedSubmission.originalData?.responseValue || 'N/A'}
+                </div>
               </div>
             </div>
             {/* Only show comment and action buttons if status is Pending */}

@@ -1,25 +1,114 @@
 import React, { useState, useEffect } from 'react';
+import { userAPI } from '../../utils/api';
 
 const statusColors = {
   Active: 'bg-green-100 text-green-800',
   Inactive: 'bg-gray-100 text-gray-600',
 };
 
-
-
 export default function UserListScreen() {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Load empty users
+  // Load users from API
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const userData = await userAPI.getUserList();
+      setUsers(userData);
+    } catch (error) {
+      setError(error.message);
+      console.error('Error fetching users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    setUsers([]);
+    fetchUsers();
   }, []);
 
-  const filteredUsers = users; // Users are already filtered by the API
+  // Filter users based on search and status
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = search === '' || 
+      user.userName.toLowerCase().includes(search.toLowerCase()) ||
+      user.email.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = status === '' || user.status === status;
+    return matchesSearch && matchesStatus;
+  });
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        {/* Filter/Search Section - Show even during loading */}
+        <div className="flex flex-col md:flex-row gap-4 items-center bg-dashboard-cardBg p-4 rounded-lg shadow">
+          <input
+            type="text"
+            placeholder="Search by username or email..."
+            disabled
+            className="w-full md:w-1/3 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-100"
+          />
+          <select
+            disabled
+            className="w-full md:w-1/4 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-100"
+          >
+            <option value="">All Statuses</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+
+        {/* Table Section with Loading */}
+        <div className="bg-dashboard-cardBg rounded-lg shadow p-4">
+          <div className="flex justify-center items-center h-32">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+            <span className="ml-4 text-primary-600 font-medium">Loading users...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        {/* Filter/Search Section - Show even during error */}
+        <div className="flex flex-col md:flex-row gap-4 items-center bg-dashboard-cardBg p-4 rounded-lg shadow">
+          <input
+            type="text"
+            placeholder="Search by username or email..."
+            disabled
+            className="w-full md:w-1/3 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-100"
+          />
+          <select
+            disabled
+            className="w-full md:w-1/4 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-100"
+          >
+            <option value="">All Statuses</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+
+        {/* Table Section with Error */}
+        <div className="bg-dashboard-cardBg rounded-lg shadow p-4">
+          <div className="text-center py-8">
+            <div className="text-red-600 mb-2">{error}</div>
+            <button 
+              onClick={fetchUsers} 
+              className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -58,15 +147,17 @@ export default function UserListScreen() {
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredUsers.length === 0 ? (
               <tr>
-                <td colSpan="5" className="px-6 py-4 text-center text-gray-400">No users found.</td>
+                <td colSpan="5" className="px-6 py-4 text-center text-gray-400">
+                  {users.length === 0 ? 'No users found.' : 'No users match your search criteria.'}
+                </td>
               </tr>
             ) : (
               filteredUsers.map(user => (
-                <tr key={user.id} className="hover:bg-gray-50 transition">
-                  <td className="px-6 py-4 whitespace-nowrap text-dashboard-bodyText">{user.username}</td>
+                <tr key={user.userId} className="hover:bg-gray-50 transition">
+                  <td className="px-6 py-4 whitespace-nowrap text-dashboard-bodyText">{user.userName}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-dashboard-bodyText">{user.email}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-dashboard-bodyText">{user.role}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center text-dashboard-bodyText">{user.forms}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-center text-dashboard-bodyText">{user.totalAssignedForms}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${statusColors[user.status] || 'bg-red-100 text-red-800'}`}>{user.status}</span>
                   </td>

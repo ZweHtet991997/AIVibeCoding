@@ -3,8 +3,15 @@
 ## Overview
 The admin dashboard now dynamically fetches and displays real-time data from the backend API when admin users log in and access the dashboard.
 
-## API Endpoint
+## API Endpoints
+
+### Dashboard Data
 - **URL**: `{{baseurl}}/api/admin/dashboard`
+- **Method**: GET
+- **Authorization**: Bearer token (included in request headers)
+
+### Forms List
+- **URL**: `{{baseurl}}/api/admin/forms`
 - **Method**: GET
 - **Authorization**: Bearer token (included in request headers)
 
@@ -30,12 +37,21 @@ The admin dashboard now dynamically fetches and displays real-time data from the
 - Shows percentage and count for each status (Approved, Pending, Rejected)
 - Uses color-coded segments for easy visualization
 
-### 4. Admin Dashboard (`src/components/AdminDashboard.js`)
+### 4. Forms Screen (`src/components/dashboard/FormsScreen.js`)
+- Fetches and displays forms list from API
+- Includes search and status filtering functionality
+- Shows form details: name, status, submissions count, creation date
+- Provides actions: Assign Users, Edit, Delete
+- Auto-refreshes data when user returns to the tab
+
+### 5. Admin Dashboard (`src/components/AdminDashboard.js`)
 - Verifies admin privileges before loading dashboard
 - Includes loading state during admin verification
 - Provides manual refresh button for data updates
 
-## Expected API Response Format
+## Expected API Response Formats
+
+### Dashboard Data Response
 ```json
 {
   "totalFormsCreated": 3,
@@ -57,6 +73,38 @@ The admin dashboard now dynamically fetches and displays real-time data from the
       "percentage": 33.33
     }
   }
+}
+```
+
+### Forms List Response
+```json
+{
+  "forms": [
+    {
+      "id": "1",
+      "name": "Employee Onboarding Form",
+      "status": "Active",
+      "totalSubmissions": 15,
+      "createdDate": "2024-01-15T10:30:00Z",
+      "description": "Form for new employee onboarding process"
+    },
+    {
+      "id": "2", 
+      "name": "Leave Request Form",
+      "status": "Active",
+      "totalSubmissions": 8,
+      "createdDate": "2024-01-10T14:20:00Z",
+      "description": "Form for employee leave requests"
+    },
+    {
+      "id": "3",
+      "name": "Feedback Survey",
+      "status": "Inactive",
+      "totalSubmissions": 25,
+      "createdDate": "2024-01-05T09:15:00Z",
+      "description": "Employee feedback survey form"
+    }
+  ]
 }
 ```
 

@@ -31,41 +31,49 @@ const FormListTable = ({ forms, onEdit, onAssignUsers, onDelete }) => {
           </tr>
         </thead>
         <tbody>
-          {forms.map((form) => (
-            <tr key={form.id} className="border-b border-gray-100 hover:bg-gray-50">
-              <td className="py-4 px-4 text-dashboard-bodyText font-medium">{form.name}</td>
-              <td className="py-4 px-4">
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${form.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'}`}>{form.status}</span>
-              </td>
-              <td className="py-4 px-4 text-dashboard-bodyText">{form.totalSubmissions}</td>
-              <td className="py-4 px-4 text-dashboard-bodyText">{new Date(form.createdDate).toLocaleDateString()}</td>
-              <td className="py-4 px-4">
-                <div className="flex gap-2">
-                  <button
-                    className="flex items-center gap-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded text-xs font-medium"
-                    onClick={() => onAssignUsers(form)}
-                  >
-                    {UserPlusIcon}
-                    Assign Users
-                  </button>
-                  <button
-                    className="flex items-center gap-1.5 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-3 py-2 rounded text-xs font-medium"
-                    onClick={() => onEdit(form)}
-                  >
-                    {PencilSquareIcon}
-                    Edit
-                  </button>
-                  <button
-                    className="flex items-center gap-1.5 bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded text-xs font-medium"
-                    onClick={() => onDelete(form.id)}
-                  >
-                    {TrashIcon}
-                    Delete
-                  </button>
-                </div>
+          {forms.length === 0 ? (
+            <tr>
+              <td colSpan="5" className="py-8 px-4 text-center text-gray-500">
+                No forms found.
               </td>
             </tr>
-          ))}
+          ) : (
+            forms.map((form) => (
+              <tr key={form.formId} className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="py-4 px-4 text-dashboard-bodyText font-medium">{form.formName}</td>
+                <td className="py-4 px-4">
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${form.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700'}`}>{form.status}</span>
+                </td>
+                <td className="py-4 px-4 text-dashboard-bodyText">{form.totalSubmissions}</td>
+                <td className="py-4 px-4 text-dashboard-bodyText">{new Date(form.createdDate).toLocaleDateString()}</td>
+                <td className="py-4 px-4">
+                  <div className="flex gap-2">
+                    <button
+                      className="flex items-center gap-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded text-xs font-medium"
+                      onClick={() => onAssignUsers(form)}
+                    >
+                      {UserPlusIcon}
+                      Assign Users
+                    </button>
+                    <button
+                      className="flex items-center gap-1.5 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-3 py-2 rounded text-xs font-medium"
+                      onClick={() => onEdit(form)}
+                    >
+                      {PencilSquareIcon}
+                      Edit
+                    </button>
+                    <button
+                      className="flex items-center gap-1.5 bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded text-xs font-medium"
+                      onClick={() => onDelete(form.formId)}
+                    >
+                      {TrashIcon}
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

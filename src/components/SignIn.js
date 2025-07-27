@@ -85,7 +85,7 @@ const SignIn = () => {
     setIsLoading(true);
     setError('');
     try {
-      const response = await fetch(`${apiConfig.baseUrl}/api/Auth/login`, {
+      const response = await fetch(`${apiConfig.baseUrl}/api/v1/Auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
