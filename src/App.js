@@ -60,11 +60,6 @@ function App() {
               <FormBuilderScreen />
             </ProtectedRoute>
           } />
-          <Route path="/form-builder/:formId" element={
-            <ProtectedRoute>
-              <FormBuilderScreen />
-            </ProtectedRoute>
-          } />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         {!hideBot && <BIMBot />}

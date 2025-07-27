@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FormListTable from './forms/FormListTable';
 import AssignUsersModal from './forms/AssignUsersModal';
-import DeleteConfirmDialog from './forms/DeleteConfirmDialog';
+
 import { isAdmin } from '../../utils/auth';
 import { formsAPI } from '../../utils/api';
 
@@ -14,36 +14,57 @@ const FormsScreen = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [isAssignUsersOpen, setIsAssignUsersOpen] = useState(false);
   const [selectedForm, setSelectedForm] = useState(null);
-  const [deleteFormId, setDeleteFormId] = useState(null);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // Fetch forms with assigned user counts
+  const fetchForms = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      // Verify admin access
+      if (!isAdmin()) {
+        setError('Admin privileges required to view forms data.');
+        setLoading(false);
+        return;
+      }
+
+      // Fetch forms from API
+      const formsData = await formsAPI.getFormsList();
+      
+      // Enhance forms data with assigned user counts
+      const formsWithUserCounts = await Promise.all(
+        formsData.map(async (form) => {
+          try {
+            const assignments = await formsAPI.getFormAssignments(form.formId);
+            return {
+              ...form,
+              totalAssignedUsers: assignments.length
+            };
+          } catch (error) {
+            console.error(`Error fetching assignments for form ${form.formId}:`, error);
+            return {
+              ...form,
+              totalAssignedUsers: 0
+            };
+          }
+        })
+      );
+      
+      setForms(formsWithUserCounts);
+    } catch (error) {
+      console.error('Error fetching forms:', error);
+      setError(error.message || 'Failed to load forms. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Initialize forms screen
   useEffect(() => {
-    const fetchForms = async () => {
-      try {
-        setLoading(true);
-        setError('');
-        
-        // Verify admin access
-        if (!isAdmin()) {
-          setError('Admin privileges required to view forms data.');
-          setLoading(false);
-          return;
-        }
-
-        // Fetch forms from API
-        const formsData = await formsAPI.getFormsList();
-        setForms(formsData);
-      } catch (error) {
-        console.error('Error fetching forms:', error);
-        setError(error.message || 'Failed to load forms. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchForms();
   }, []);
 
@@ -58,9 +79,7 @@ const FormsScreen = () => {
   const handleCreateNewForm = () => {
     navigate('/form-builder');
   };
-  const handleEditForm = (form) => {
-    navigate(`/form-builder/${form.formId}`);
-  };
+
   const handleOpenAssignUsers = (form) => {
     setSelectedForm(form);
     setIsAssignUsersOpen(true);
@@ -69,23 +88,7 @@ const FormsScreen = () => {
     setSelectedForm(null);
     setIsAssignUsersOpen(false);
   };
-  const handleRequestDeleteForm = (formId) => {
-    setDeleteFormId(formId);
-  };
-  const handleCancelDelete = () => {
-    setDeleteFormId(null);
-  };
-  const handleConfirmDelete = async () => {
-    try {
-      // Simulate API call delay
-      setTimeout(() => {
-        setForms(prev => prev.filter(f => f.formId !== deleteFormId));
-        setDeleteFormId(null);
-      }, 1000);
-    } catch (error) {
-      console.error('Delete form error:', error);
-    }
-  };
+
 
   return (
     <div className="space-y-6">
@@ -134,9 +137,7 @@ const FormsScreen = () => {
         ) : (
           <FormListTable
             forms={filteredForms}
-            onEdit={handleEditForm}
             onAssignUsers={handleOpenAssignUsers}
-            onDelete={handleRequestDeleteForm}
           />
         )}
       </div>
@@ -146,12 +147,9 @@ const FormsScreen = () => {
         open={isAssignUsersOpen}
         onClose={handleCloseAssignUsers}
         form={selectedForm}
+        onSaveSuccess={fetchForms}
       />
-      <DeleteConfirmDialog
-        open={!!deleteFormId}
-        onCancel={handleCancelDelete}
-        onConfirm={handleConfirmDelete}
-      />
+
     </div>
   );
 };

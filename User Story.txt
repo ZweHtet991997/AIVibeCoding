@@ -29,7 +29,7 @@ Acceptance Criteria:
 ⦁	Authentication is handled via .NET backend, with user roles stored in MSSQL.
 
 Admin Dashboard
-(Admin-only view with four primary sections: Dashboard, Forms Management (Create New Form, Edit Form, Delete Form), Approval/Reject Form Responses, Users)
+(Admin-only view with four primary sections: Dashboard, Forms Management (Create New Form), Approval/Reject Form Responses, Users)
 
 1. Dashboard Screen
 Purpose : To view key metrics and charts about form creation and submissions, So that I can track usage and monitor approval workflows.
@@ -49,10 +49,9 @@ Features :
 ⦁	A "Create New Form" button opens Form Builder to create new custom forms.
 ⦁	Filter forms by name and status.
 ⦁	Display table:
-	- Columns: Form Name, Status, Total Submissions, Created Date, Action
+	- Columns: Form Name, Status, Total Submissions, Total Assigned Users, Created Date, Action
 ⦁	In Action:
-	- Assign Normal Users to the form.
-	- Edit form.
+	- Manage Users (assign/unassign users to the form).
 Backend Logic:
 ⦁	Form metadata stored in MSSQL (Form Name, Creator, Status).
 ⦁	Access Control List (ACL) maintained in database to map Users to Forms.
