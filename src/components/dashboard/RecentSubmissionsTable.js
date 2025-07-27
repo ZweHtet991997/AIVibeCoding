@@ -46,7 +46,10 @@ const RecentSubmissionsTable = () => {
       ) : error ? (
         <div className="text-red-600 text-center py-8">{error}</div>
       ) : submissions.length === 0 ? (
-        <div className="text-gray-500 text-center py-8">No recent submissions found.</div>
+        <div className="text-center py-8">
+          <div className="text-gray-500 mb-2">Recent submissions feature coming soon</div>
+          <p className="text-sm text-gray-400">This section will display the latest form submissions and their current status.</p>
+        </div>
       ) : (
         <>
           <div className="overflow-x-auto">

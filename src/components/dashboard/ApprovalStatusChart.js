@@ -1,15 +1,78 @@
 import React, { useState, useEffect } from 'react';
-
-
+import { dashboardAPI } from '../../utils/api';
+import { isAdmin } from '../../utils/auth';
 
 const ApprovalStatusChart = () => {
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Load empty data
+  const fetchApprovalData = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      // Only fetch data if user is admin
+      if (!isAdmin()) {
+        setError('Admin privileges required to view approval data.');
+        setLoading(false);
+        return;
+      }
+
+      const dashboardData = await dashboardAPI.getDashboardData();
+      const approvalBreakdown = dashboardData.approvalStatusBreakdown;
+      
+      if (approvalBreakdown) {
+        const chartData = [
+          {
+            status: 'Approved',
+            count: approvalBreakdown.approved?.count || 0,
+            percentage: approvalBreakdown.approved?.percentage || 0,
+            color: 'bg-dashboard-approved'
+          },
+          {
+            status: 'Pending',
+            count: approvalBreakdown.pending?.count || 0,
+            percentage: approvalBreakdown.pending?.percentage || 0,
+            color: 'bg-dashboard-pending'
+          },
+          {
+            status: 'Rejected',
+            count: approvalBreakdown.rejected?.count || 0,
+            percentage: approvalBreakdown.rejected?.percentage || 0,
+            color: 'bg-dashboard-rejected'
+          }
+        ].filter(item => item.count > 0); // Only show non-zero values
+        
+        setData(chartData);
+      } else {
+        setData([]);
+      }
+    } catch (error) {
+      console.error('Error fetching approval data:', error);
+      setError(error.message || 'Failed to load approval data');
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    setData([]);
+    fetchApprovalData();
+  }, []);
+
+  // Refresh data when component mounts or user refreshes page
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchApprovalData();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   const total = data.reduce((sum, item) => sum + item.count, 0);
@@ -31,7 +94,15 @@ const ApprovalStatusChart = () => {
           <span className="ml-4 text-primary-600 font-medium">Loading approval statistics...</span>
         </div>
       ) : error ? (
-        <div className="text-red-600 text-center py-8">{error}</div>
+        <div className="text-center py-8">
+          <div className="text-red-600 mb-2">{error}</div>
+          <button 
+            onClick={fetchApprovalData}
+            className="text-sm text-primary-600 hover:text-primary-800 underline"
+          >
+            Try again
+          </button>
+        </div>
       ) : data.length === 0 ? (
         <div className="text-gray-500 text-center py-8">No approval statistics available.</div>
       ) : (

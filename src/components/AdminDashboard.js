@@ -7,19 +7,30 @@ import RecentSubmissionsTable from './dashboard/RecentSubmissionsTable';
 import FormsScreen from './dashboard/FormsScreen';
 import ApprovalsScreen from './dashboard/ApprovalsScreen';
 import UserListScreen from './dashboard/UserListScreen';
-import { logout, getUserName } from '../utils/auth';
+import { logout, getUserName, isAdmin } from '../utils/auth';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeMenu, setActiveMenu] = useState('Dashboard');
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Set initial menu from navigation state
+  // Verify admin access and set initial menu
   useEffect(() => {
+    // Check if user is admin
+    if (!isAdmin()) {
+      navigate('/');
+      return;
+    }
+
+    // Set initial menu from navigation state
     if (location.state && location.state.activeMenu) {
       setActiveMenu(location.state.activeMenu);
     }
-  }, [location.state]);
+
+    // Set loading to false after verification
+    setIsLoading(false);
+  }, [location.state, navigate]);
 
   const menuItems = [
     { 
@@ -60,6 +71,18 @@ const AdminDashboard = () => {
     logout();
     navigate('/');
   };
+
+  // Show loading state while verifying admin access
+  if (isLoading) {
+    return (
+      <div className="flex h-screen bg-dashboard-mainBg items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-dashboard-bodyText">Verifying admin access...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-dashboard-mainBg">
@@ -113,13 +136,26 @@ const AdminDashboard = () => {
       <div className="flex-1 overflow-auto">
         <div className="p-6">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-dashboard-bodyText">
-              {activeMenu}
-            </h1>
-            <p className="text-gray-600 mt-2">
-              Welcome back, {getUserName()}! Here's what's happening with your forms and submissions.
-            </p>
+          <div className="mb-8 flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold text-dashboard-bodyText">
+                {activeMenu}
+              </h1>
+              <p className="text-gray-600 mt-2">
+                Welcome back, {getUserName()}! Here's what's happening with your forms and submissions.
+              </p>
+            </div>
+            {activeMenu === 'Dashboard' && (
+              <button
+                onClick={() => window.location.reload()}
+                className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Refresh Data
+              </button>
+            )}
           </div>
 
           {/* Dashboard Content */}
