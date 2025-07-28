@@ -28,19 +28,22 @@ const ApprovalStatusChart = () => {
             status: 'Approved',
             count: approvalBreakdown.approved?.count || 0,
             percentage: approvalBreakdown.approved?.percentage || 0,
-            color: 'bg-dashboard-approved'
+            gradient: 'from-green-400 to-emerald-400',
+            bgGradient: 'from-green-500/10 to-emerald-500/10'
           },
           {
             status: 'Pending',
             count: approvalBreakdown.pending?.count || 0,
             percentage: approvalBreakdown.pending?.percentage || 0,
-            color: 'bg-dashboard-pending'
+            gradient: 'from-yellow-400 to-orange-400',
+            bgGradient: 'from-yellow-500/10 to-orange-500/10'
           },
           {
             status: 'Rejected',
             count: approvalBreakdown.rejected?.count || 0,
             percentage: approvalBreakdown.rejected?.percentage || 0,
-            color: 'bg-dashboard-rejected'
+            gradient: 'from-red-400 to-pink-400',
+            bgGradient: 'from-red-500/10 to-pink-500/10'
           }
         ].filter(item => item.count > 0); // Only show non-zero values
         
@@ -78,33 +81,58 @@ const ApprovalStatusChart = () => {
   const total = data.reduce((sum, item) => sum + item.count, 0);
 
   return (
-    <div className="bg-dashboard-cardBg rounded-lg shadow-md p-6">
+    <div className="glass-card rounded-2xl p-6 h-full">
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-dashboard-bodyText mb-2">
-          Approval Status Breakdown
-        </h3>
-        <p className="text-sm text-gray-600">
-          Distribution of form submission statuses
-        </p>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-lg font-bold text-gray-800 mb-2">
+              Approval Status Breakdown
+            </h3>
+            <p className="text-gray-600 text-sm">
+              Distribution of form submission statuses
+            </p>
+          </div>
+          <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-emerald-400 rounded-xl flex items-center justify-center">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        </div>
       </div>
 
       {loading ? (
         <div className="flex justify-center items-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-          <span className="ml-4 text-primary-600 font-medium">Loading approval statistics...</span>
+          <div className="relative">
+            <div className="w-8 h-8 border-2 border-green-400/30 rounded-full animate-spin"></div>
+            <div className="absolute inset-0 w-8 h-8 border-2 border-transparent border-t-green-400 rounded-full animate-spin" style={{ animationDuration: '1s' }}></div>
+          </div>
+          <span className="ml-4 text-gray-700 font-medium">Loading approval statistics...</span>
         </div>
       ) : error ? (
         <div className="text-center py-8">
-          <div className="text-red-600 mb-2">{error}</div>
-          <button 
-            onClick={fetchApprovalData}
-            className="text-sm text-primary-600 hover:text-primary-800 underline"
-          >
-            Try again
-          </button>
+          <div className="glass-button rounded-xl p-4">
+            <svg className="w-8 h-8 text-red-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div className="text-red-500 mb-2">{error}</div>
+            <button 
+              onClick={fetchApprovalData}
+              className="glass-button px-4 py-2 rounded-lg text-gray-700 hover:text-gray-900 hover:neon-soft transition-all duration-300"
+            >
+              Try again
+            </button>
+          </div>
         </div>
       ) : data.length === 0 ? (
-        <div className="text-gray-500 text-center py-8">No approval statistics available.</div>
+        <div className="text-center py-12">
+          <div className="w-16 h-16 bg-gradient-to-r from-gray-300 to-gray-400 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p className="text-gray-500 font-medium">No approval statistics available</p>
+          <p className="text-gray-400 text-sm mt-1">Data will appear here once available</p>
+        </div>
       ) : (
         <div className="flex items-center space-x-8">
           {/* Donut Chart */}
@@ -116,7 +144,7 @@ const ApprovalStatusChart = () => {
                 cy="50"
                 r="40"
                 fill="none"
-                stroke="#f3f4f6"
+                stroke="rgba(229, 231, 235, 0.5)"
                 strokeWidth="8"
               />
               
@@ -138,15 +166,19 @@ const ApprovalStatusChart = () => {
                   
                   currentAngle += angle;
                   
+                  // Define gradient colors based on status
+                  const strokeColor = item.status === 'Approved' ? '#10B981' : 
+                                   item.status === 'Pending' ? '#F59E0B' : 
+                                   item.status === 'Rejected' ? '#EF4444' : '#6B7280';
+                  
                   return (
                     <path
                       key={index}
                       d={pathData}
                       fill="none"
-                      stroke={item.color === 'bg-dashboard-approved' ? '#4ECB71' : 
-                             item.color === 'bg-dashboard-pending' ? '#FFC107' : 
-                             item.color === 'bg-dashboard-rejected' ? '#FF4D4F' : '#ccc'}
+                      stroke={strokeColor}
                       strokeWidth="8"
+                      className="transition-all duration-300 hover:stroke-width-10"
                     />
                   );
                 });
@@ -156,10 +188,10 @@ const ApprovalStatusChart = () => {
             {/* Center text */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
-                <div className="text-2xl font-bold text-dashboard-bodyText">
+                <div className="text-2xl font-bold text-gray-800">
                   {total.toLocaleString()}
                 </div>
-                <div className="text-xs text-dashboard-headerText">
+                <div className="text-xs text-gray-500 font-medium">
                   Total
                 </div>
               </div>
@@ -167,21 +199,23 @@ const ApprovalStatusChart = () => {
           </div>
 
           {/* Legend */}
-          <div className="flex-1 space-y-3">
+          <div className="flex-1 space-y-4">
             {data.map((item, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className={`w-3 h-3 rounded-full ${item.color} mr-3`}></div>
-                  <span className="text-sm text-dashboard-bodyText">
-                    {item.status}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-semibold text-dashboard-bodyText">
-                    {item.count.toLocaleString()}
+              <div key={index} className="glass-button rounded-xl p-3 group hover:scale-105 transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className={`w-4 h-4 bg-gradient-to-r ${item.gradient} rounded-full mr-3`}></div>
+                    <span className="text-sm font-medium text-gray-600 group-hover:text-gray-800 transition-colors duration-300">
+                      {item.status}
+                    </span>
                   </div>
-                  <div className="text-xs text-dashboard-headerText">
-                    {item.percentage}%
+                  <div className="text-right">
+                    <div className="text-sm font-bold text-gray-800">
+                      {item.count.toLocaleString()}
+                    </div>
+                    <div className="text-xs text-gray-500 font-medium">
+                      {item.percentage}%
+                    </div>
                   </div>
                 </div>
               </div>

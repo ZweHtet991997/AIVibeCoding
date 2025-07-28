@@ -217,73 +217,68 @@ const ApprovalsScreen = () => {
 
       {/* Detail Modal */}
       {modalOpen && selectedSubmission && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative animate-fadeIn">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setModalOpen(false)}>
+          <div className="bg-white/95 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl w-full max-w-2xl h-[600px] p-8 relative animate-scale-in flex flex-col" onClick={(e) => e.stopPropagation()}>
             <button
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl"
+              className="absolute top-4 right-4 glass-button rounded-lg p-2 text-gray-600 hover:text-gray-800 hover:neon-soft transition-all duration-300"
               onClick={() => setModalOpen(false)}
               aria-label="Close"
             >
-              &times;
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
-            <h2 className="text-xl font-bold mb-2">Submission Details</h2>
-            <div className="mb-4 text-sm text-gray-500">ID: {selectedSubmission.id}</div>
-            <div className="mb-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Submission Details</h2>
+              <p className="text-gray-600">Review and manage submission information</p>
+            </div>
+            <div className="mb-6">
+              <div className="grid grid-cols-3 gap-6">
                 <div>
-                  <div className="font-semibold">Form Name:</div>
-                  <div>{selectedSubmission.formName}</div>
+                  <div className="text-sm font-medium text-gray-600 mb-1">Form Name</div>
+                  <div className="font-semibold text-gray-800">{selectedSubmission.formName}</div>
                 </div>
                 <div>
-                  <div className="font-semibold">Submitted By:</div>
-                  <div>{selectedSubmission.submittedBy}</div>
+                  <div className="text-sm font-medium text-gray-600 mb-1">Submitted By</div>
+                  <div className="font-semibold text-gray-800">{selectedSubmission.submittedBy}</div>
                 </div>
                 <div>
-                  <div className="font-semibold">User Email:</div>
-                  <div>{selectedSubmission.originalData?.userEmail || 'N/A'}</div>
-                </div>
-                <div>
-                  <div className="font-semibold">Submission Date:</div>
-                  <div>{new Date(selectedSubmission.submissionDate).toLocaleDateString()}</div>
-                </div>
-                <div>
-                  <div className="font-semibold">Status:</div>
-                  <div>{selectedSubmission.status}</div>
-                </div>
-                <div>
-                  <div className="font-semibold">Decision Date:</div>
-                  <div>{selectedSubmission.originalData?.decisionDate ? new Date(selectedSubmission.originalData.decisionDate).toLocaleDateString() : 'N/A'}</div>
+                  <div className="text-sm font-medium text-gray-600 mb-1">Submission Date</div>
+                  <div className="font-semibold text-gray-800">{new Date(selectedSubmission.submissionDate).toLocaleDateString()}</div>
                 </div>
               </div>
             </div>
-            <div className="mb-4">
-              <div className="font-semibold mb-2">Form Data:</div>
-              <div className="bg-gray-50 border border-gray-200 rounded p-4 text-sm">
-                <div className="mb-2">
-                  <span className="font-medium text-gray-700">Field:</span> {selectedSubmission.originalData?.fieldKey || 'N/A'}
+            <div className="mb-6 flex-1 overflow-hidden">
+              <div className="text-lg font-semibold text-gray-800 mb-3">Form Data</div>
+              <div className="bg-white/90 backdrop-blur-md border border-white/20 p-4 rounded-xl shadow-lg h-full overflow-y-auto">
+                <div className="mb-3">
+                  <span className="text-sm font-medium text-gray-600">Field:</span>
+                  <div className="font-semibold text-gray-800 mt-1">{selectedSubmission.originalData?.fieldKey || 'N/A'}</div>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700">Response:</span> {selectedSubmission.originalData?.responseValue || 'N/A'}
+                  <span className="text-sm font-medium text-gray-600">Response:</span>
+                  <div className="font-semibold text-gray-800 mt-1">{selectedSubmission.originalData?.responseValue || 'N/A'}</div>
                 </div>
               </div>
             </div>
             {/* Only show comment and action buttons if status is Pending */}
             {selectedSubmission.status === 'Pending' ? (
               <>
-                <div className="mb-4">
-                  <div className="font-semibold mb-2">Admin Comment:</div>
+                <div className="mb-6">
+                  <div className="text-lg font-semibold text-gray-800 mb-3">Admin Comment</div>
                   <textarea
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
-                    rows={2}
+                    className="w-full glass-input rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
+                    rows={3}
                     placeholder="Add a comment (optional)"
                     value={actionComment}
                     onChange={e => setActionComment(e.target.value)}
                     disabled={actionLoading}
                   />
                 </div>
-                <div className="flex gap-3 justify-end">
+                <div className="flex gap-2 justify-end">
                   <button
-                    className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium disabled:opacity-60 transition-colors duration-150"
+                    className="flex items-center gap-1.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-60"
                     onClick={() => handleAction('Approved')}
                     disabled={actionLoading}
                   >
@@ -291,7 +286,7 @@ const ApprovalsScreen = () => {
                     {actionLoading ? 'Approving...' : 'Approve'}
                   </button>
                   <button
-                    className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium disabled:opacity-60 transition-colors duration-150"
+                    className="flex items-center gap-1.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-60"
                     onClick={() => handleAction('Rejected')}
                     disabled={actionLoading}
                   >
@@ -301,17 +296,13 @@ const ApprovalsScreen = () => {
                 </div>
               </>
             ) : (
-              <div className="mb-4">
-                <div className="font-semibold mb-2">Admin Comment:</div>
-                <div className="bg-gray-50 border border-gray-200 rounded p-3 text-sm text-gray-700 min-h-[2.5rem]">
-                  {selectedSubmission.comment || <span className="text-gray-400">No comment</span>}
+              <div className="mb-6">
+                <div className="text-lg font-semibold text-gray-800 mb-3">Admin Comment</div>
+                <div className="bg-white/90 backdrop-blur-md border border-white/20 p-4 rounded-xl shadow-lg text-sm text-gray-700 min-h-[3rem]">
+                  {selectedSubmission.comment || <span className="text-gray-400">No comment provided</span>}
                 </div>
               </div>
             )}
-            <style>{`
-              @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-              .animate-fadeIn { animation: fadeIn 0.2s ease; }
-            `}</style>
           </div>
         </div>
       )}

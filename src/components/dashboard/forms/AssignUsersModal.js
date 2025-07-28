@@ -135,82 +135,114 @@ const AssignUsersModal = ({ open, onClose, form, onSaveSuccess }) => {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div className="bg-white/95 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl w-full max-w-lg p-8 relative animate-scale-in" onClick={(e) => e.stopPropagation()}>
         <button
-          className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl"
+          className="absolute top-4 right-4 glass-button rounded-lg p-2 text-gray-600 hover:text-gray-800 hover:neon-soft transition-all duration-300"
           onClick={onClose}
           aria-label="Close"
         >
-          &times;
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </button>
         
-        <h2 className="text-xl font-bold mb-4">
-          Manage Form Users: {form?.formName || 'Unknown Form'}
-        </h2>
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            Manage Form Users
+          </h2>
+          <p className="text-gray-600">Assign or unassign users to: <span className="font-semibold text-gray-800">{form?.formName || 'Unknown Form'}</span></p>
+        </div>
 
         {/* Error Message */}
         {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-            {error}
+          <div className="mb-6 p-4 glass-card border border-red-200/50 text-red-700 rounded-xl">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {error}
+            </div>
           </div>
         )}
 
         {/* Search Input */}
-        <input
-          type="text"
-          placeholder="Search users to assign/unassign..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-        />
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Search Users</label>
+          <input
+            type="text"
+            placeholder="Search by name or email..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full glass-input px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+          />
+        </div>
 
         {/* Loading State */}
         {loading ? (
-          <div className="flex justify-center items-center h-32">
+          <div className="flex justify-center items-center h-32 mb-6">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
             <span className="ml-4 text-primary-600 font-medium">Loading users...</span>
           </div>
         ) : (
           /* User List */
-          <div className="max-h-60 overflow-y-auto mb-4">
-            {filteredUsers.length === 0 ? (
-              <div className="text-gray-400 text-center py-8">
-                {users.length === 0 ? 'No active users available' : 'No users match your search'}
-              </div>
-            ) : (
-              <ul className="divide-y divide-gray-100">
-                {filteredUsers.map(user => (
-                  <li key={user.userId} className="flex items-center py-2 px-1">
-                    <input
-                      type="checkbox"
-                      checked={selected.includes(user.userId)}
-                      onChange={() => handleToggle(user.userId)}
-                      className="mr-3 accent-primary-600"
-                      id={`assign-user-${user.userId}`}
-                    />
-                    <label htmlFor={`assign-user-${user.userId}`} className="flex-1 cursor-pointer">
-                      <span className="font-medium text-dashboard-bodyText">{user.userName}</span>
-                      <span className="ml-2 text-gray-500 text-sm">{user.email}</span>
-                    </label>
-                  </li>
-                ))}
-              </ul>
-            )}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-3">Select Users</label>
+            <div className="max-h-60 overflow-y-auto bg-white/90 backdrop-blur-md border border-white/20 rounded-xl p-4 shadow-lg">
+              {filteredUsers.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="w-12 h-12 bg-gradient-to-r from-gray-300 to-gray-400 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <p className="text-gray-500 font-medium">
+                    {users.length === 0 ? 'No active users available' : 'No users match your search'}
+                  </p>
+                </div>
+              ) : (
+                <ul className="space-y-2">
+                  {filteredUsers.map(user => (
+                    <li key={user.userId} className="flex items-center p-3 rounded-lg hover:bg-white/50 transition-all duration-200">
+                      <input
+                        type="checkbox"
+                        checked={selected.includes(user.userId)}
+                        onChange={() => handleToggle(user.userId)}
+                        className="mr-3 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                        id={`assign-user-${user.userId}`}
+                      />
+                      <label htmlFor={`assign-user-${user.userId}`} className="flex-1 cursor-pointer">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full flex items-center justify-center mr-3">
+                            <span className="text-white text-sm font-medium">
+                              {user.userName?.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-gray-800">{user.userName}</span>
+                            <span className="block text-gray-500 text-sm">{user.email}</span>
+                          </div>
+                        </div>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
         )}
 
         {/* Action Buttons */}
-        <div className="mt-6 flex justify-end gap-2">
+        <div className="flex justify-end gap-3">
           <button
-            className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2 rounded-lg font-medium"
+            className="glass-button px-6 py-3 rounded-xl font-medium text-gray-700 hover:text-gray-900 hover:neon-soft transition-all duration-300"
             onClick={onClose}
             disabled={saving}
           >
             Cancel
           </button>
           <button
-            className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg font-medium disabled:opacity-60 flex items-center"
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-60 flex items-center"
             onClick={handleSave}
             disabled={loading || saving || filteredUsers.length === 0}
           >
@@ -220,7 +252,7 @@ const AssignUsersModal = ({ open, onClose, form, onSaveSuccess }) => {
                 Saving...
               </>
             ) : (
-              'Save'
+              'Save Changes'
             )}
           </button>
         </div>
