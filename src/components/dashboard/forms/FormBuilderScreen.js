@@ -105,8 +105,8 @@ const FormBuilderScreen = () => {
       case 'radio':
       case 'checkbox':
         newField.options = [
-          { value: 'option1', label: 'Option 1' },
-          { value: 'option2', label: 'Option 2' }
+          { value: 'Option 1' },
+          { value: 'Option 2' }
         ];
         break;
       case 'number':
@@ -171,14 +171,45 @@ const FormBuilderScreen = () => {
     try {
       setSaving(true);
       
-      // TODO: Replace with actual API call when backend is ready
-      // await formsAPI.saveForm(form);
+      // Generate form data with metadata
+      const formData = {
+        id: form.id || `form_${Date.now()}`,
+        name: form.name || 'Untitled Form',
+        description: form.description || '',
+        fields: form.fields || [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        version: '1.0.0',
+        metadata: {
+          totalFields: form.fields?.length || 0,
+          requiredFields: form.fields?.filter(f => f.required)?.length || 0,
+          fieldTypes: form.fields?.reduce((acc, field) => {
+            acc[field.type] = (acc[field.type] || 0) + 1;
+            return acc;
+          }, {}) || {}
+        }
+      };
+
+      // Create JSON blob
+      const jsonString = JSON.stringify(formData, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
       
-      // For demo purposes, simulate save
-      console.log('Saving form:', form);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${formData.name.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.json`;
       
-      alert('Form saved successfully!');
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up
+      URL.revokeObjectURL(url);
+      
+      console.log('Form saved as JSON:', formData);
+      alert('Form saved successfully! JSON file downloaded.');
     } catch (error) {
       console.error('Error saving form:', error);
       alert('Error saving form. Please try again.');
@@ -219,7 +250,7 @@ const FormBuilderScreen = () => {
           <div className="flex items-center space-x-3">
             <button
               onClick={handleBack}
-              className="glass-button rounded-xl px-3 py-2 text-gray-600 hover:text-gray-800 hover:neon-soft transition-all duration-300"
+              className="glass-card neon-soft rounded-xl px-3 py-2 text-gray-600 hover:text-gray-800 hover:neon-soft transition-all duration-300"
             >
               <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -233,10 +264,10 @@ const FormBuilderScreen = () => {
           <div className="flex items-center space-x-3">
             <button
               onClick={() => setPreviewMode(!previewMode)}
-              className={`glass-button rounded-xl px-4 py-2 font-medium transition-all duration-300 ${
+              className={`glass-card rounded-xl px-4 py-2 font-medium transition-all duration-300 text-gray-800 ${
                 previewMode
-                  ? 'glass-card text-gray-800 neon-soft'
-                  : 'text-gray-600 hover:text-gray-800 hover:neon-soft'
+                  ? 'neon-soft'
+                  : 'hover:neon-soft'
               }`}
             >
               <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -262,7 +293,7 @@ const FormBuilderScreen = () => {
       <div className="flex h-screen relative z-10 pt-20">
         {/* Left Sidebar - Field Library */}
         {!previewMode && (
-          <div className="w-64 glass-soft border-r border-white/10 flex flex-col">
+          <div className="w-80 glass-soft border-r border-white/10 flex flex-col">
             <FormBuilderToolbar onAddField={handleAddField} />
           </div>
         )}

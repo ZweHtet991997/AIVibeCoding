@@ -43,12 +43,12 @@ export const sampleFormData = {
       label: "Department",
       required: true,
       options: [
-        { value: "engineering", label: "Engineering" },
-        { value: "marketing", label: "Marketing" },
-        { value: "sales", label: "Sales" },
-        { value: "hr", label: "Human Resources" },
-        { value: "finance", label: "Finance" },
-        { value: "operations", label: "Operations" }
+        { value: "Engineering" },
+        { value: "Marketing" },
+        { value: "Sales" },
+        { value: "Human Resources" },
+        { value: "Finance" },
+        { value: "Operations" }
       ]
     },
     {
@@ -91,14 +91,14 @@ export const sampleFormData = {
       label: "Technical Skills",
       required: false,
       options: [
-        { value: "javascript", label: "JavaScript" },
-        { value: "python", label: "Python" },
-        { value: "react", label: "React" },
-        { value: "nodejs", label: "Node.js" },
-        { value: "sql", label: "SQL" },
-        { value: "aws", label: "AWS" },
-        { value: "docker", label: "Docker" },
-        { value: "git", label: "Git" }
+        { value: "JavaScript" },
+        { value: "Python" },
+        { value: "React" },
+        { value: "Node.js" },
+        { value: "SQL" },
+        { value: "AWS" },
+        { value: "Docker" },
+        { value: "Git" }
       ],
       helpText: "Select all skills that apply to you"
     },
@@ -108,9 +108,9 @@ export const sampleFormData = {
       label: "Work Preference",
       required: true,
       options: [
-        { value: "remote", label: "Remote" },
-        { value: "hybrid", label: "Hybrid" },
-        { value: "onsite", label: "On-site" }
+        { value: "Remote" },
+        { value: "Hybrid" },
+        { value: "On-site" }
       ]
     },
     {
@@ -191,10 +191,10 @@ export const sampleAssignedForms = [
         label: "Training Session",
         required: true,
         options: [
-          { value: "react_basics", label: "React Basics" },
-          { value: "node_advanced", label: "Node.js Advanced" },
-          { value: "database_design", label: "Database Design" },
-          { value: "agile_methodology", label: "Agile Methodology" }
+          { value: "React Basics" },
+          { value: "Node.js Advanced" },
+          { value: "Database Design" },
+          { value: "Agile Methodology" }
         ]
       },
       {
@@ -203,11 +203,11 @@ export const sampleAssignedForms = [
         label: "Overall Rating",
         required: true,
         options: [
-          { value: "5", label: "Excellent (5)" },
-          { value: "4", label: "Very Good (4)" },
-          { value: "3", label: "Good (3)" },
-          { value: "2", label: "Fair (2)" },
-          { value: "1", label: "Poor (1)" }
+          { value: "Excellent (5)" },
+          { value: "Very Good (4)" },
+          { value: "Good (3)" },
+          { value: "Fair (2)" },
+          { value: "Poor (1)" }
         ]
       },
       {

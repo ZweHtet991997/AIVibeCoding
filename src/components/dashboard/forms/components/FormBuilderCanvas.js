@@ -44,8 +44,8 @@ const FormBuilderCanvas = ({
         case 'radio':
         case 'checkbox':
           newField.options = [
-            { value: 'option1', label: 'Option 1' },
-            { value: 'option2', label: 'Option 2' }
+            { value: 'Option 1' },
+            { value: 'Option 2' }
           ];
           break;
         case 'number':
@@ -77,31 +77,25 @@ const FormBuilderCanvas = ({
   return (
     <div className="h-full flex flex-col">
       {/* Form Header Configuration */}
-      <div className="glass-soft border-b border-white/10 p-6">
+      <div className="border-b border-white/10 py-4 px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="space-y-4">
+          <div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Form Name *
-              </label>
               <input
                 type="text"
                 value={form.name}
                 onChange={(e) => onFormUpdate({ name: e.target.value })}
-                placeholder="Enter form name"
-                className="glass-input w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                placeholder="Form Name"
+                className="bg-transparent w-full px-4 py-1 text-2xl font-semibold text-gray-800 placeholder-gray-400 rounded-xl focus:outline-none focus:border-transparent transition-all duration-300"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Form Description
-              </label>
-              <textarea
+              <input
                 value={form.description}
                 onChange={(e) => onFormUpdate({ description: e.target.value })}
-                placeholder="Enter form description (optional)"
-                rows={3}
-                className="glass-input w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical transition-all duration-300"
+                placeholder="Description"
+                rows={2}
+                className="bg-transparent w-full px-4 py-1 text-md text-gray-600 placeholder-gray-400 rounded-xl focus:outline-none focus:border-transparent resize-none transition-all duration-300"
               />
             </div>
           </div>
@@ -109,7 +103,7 @@ const FormBuilderCanvas = ({
       </div>
 
       {/* Form Fields Canvas */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto px-6 py-1">
         <div className="max-w-4xl mx-auto">
           {/* Drop Zone */}
           <div
@@ -135,22 +129,38 @@ const FormBuilderCanvas = ({
                 </p>
                 <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
                   <span className="flex items-center">
-                    <span className="mr-2">📝</span>
+                    <span className="mr-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </span>
                     Text Input
                   </span>
                   <span>•</span>
                   <span className="flex items-center">
-                    <span className="mr-2">📧</span>
+                    <span className="mr-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                      </svg>
+                    </span>
                     Email
                   </span>
                   <span>•</span>
                   <span className="flex items-center">
-                    <span className="mr-2">📋</span>
+                    <span className="mr-2">
+                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                     </svg>
+                    </span>
                     Dropdown
                   </span>
                   <span>•</span>
                   <span className="flex items-center">
-                    <span className="mr-2">📅</span>
+                    <span className="mr-2">
+                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                     </svg>
+                    </span>
                     Date
                   </span>
                 </div>
@@ -180,21 +190,6 @@ const FormBuilderCanvas = ({
               </div>
             )}
           </div>
-
-          {/* Form Stats */}
-          {form.fields.length > 0 && (
-            <div className="mt-6 bg-white rounded-lg border border-gray-200 p-4">
-              <div className="flex items-center justify-between text-sm text-gray-600">
-                <span>
-                  📊 {form.fields.length} field{form.fields.length !== 1 ? 's' : ''} • 
-                  {form.fields.filter(f => f.required).length} required
-                </span>
-                <span>
-                  💾 Form will be saved as JSON
-                </span>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

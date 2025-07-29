@@ -169,9 +169,9 @@ const FormFiller = () => {
           <select {...commonProps}>
             <option value="">Select an option</option>
             {field.options?.map((option, index) => (
-              <option key={index} value={option.value || option}>
-                {option.label || option}
-              </option>
+                              <option key={index} value={option.value || option}>
+                  {option.value || option}
+                </option>
             ))}
           </select>
         );
@@ -190,7 +190,7 @@ const FormFiller = () => {
                   className="mr-2"
                   required={field.required}
                 />
-                <span>{option.label || option}</span>
+                <span>{option.value || option}</span>
               </label>
             ))}
           </div>
@@ -214,7 +214,7 @@ const FormFiller = () => {
                   }}
                   className="mr-2"
                 />
-                <span>{option.label || option}</span>
+                <span>{option.value || option}</span>
               </label>
             ))}
           </div>

@@ -94,7 +94,7 @@ const FormsScreen = () => {
     <div>
 
       {/* Filter/Search Section */}
-      <div className="flex flex-col md:flex-row md:items-center bg-dashboard-cardBg p-4 rounded-lg shadow justify-between gap-4">
+      <div className="flex flex-col mb-6 md:flex-row md:items-center glass-card p-4 rounded-lg shadow justify-between gap-4">
         <div className="flex flex-col md:flex-row gap-4 flex-1">
           <input
             type="text"
@@ -124,7 +124,7 @@ const FormsScreen = () => {
       </div>
 
       {/* Table Section */}
-      <div className="bg-dashboard-cardBg rounded-lg shadow p-4">
+      <div className="glass-card rounded-lg shadow p-4">
         {loading ? (
           <div className="flex justify-center items-center h-32">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>

@@ -125,9 +125,9 @@ const FormPreview = ({ form }) => {
           <select {...commonProps}>
             <option value="">Select an option</option>
             {field.options?.map((option, index) => (
-              <option key={index} value={option.value || option}>
-                {option.label || option}
-              </option>
+                              <option key={index} value={option.value || option}>
+                  {option.value || option}
+                </option>
             ))}
           </select>
         );
@@ -146,7 +146,7 @@ const FormPreview = ({ form }) => {
                   className="mr-2"
                   required={field.required}
                 />
-                <span>{option.label || option}</span>
+                <span>{option.value || option}</span>
               </label>
             ))}
           </div>
@@ -170,7 +170,7 @@ const FormPreview = ({ form }) => {
                   }}
                   className="mr-2"
                 />
-                <span>{option.label || option}</span>
+                <span>{option.value || option}</span>
               </label>
             ))}
           </div>
@@ -227,7 +227,7 @@ const FormPreview = ({ form }) => {
                 <p className="text-gray-600 mt-1">{form.description}</p>
               )}
             </div>
-            <span className="glass-button rounded-full px-3 py-1 text-sm font-medium text-gray-600">
+            <span className="rounded-full px-3 py-1 text-sm font-medium text-gray-600">
               <svg className="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -260,7 +260,7 @@ const FormPreview = ({ form }) => {
             <div className="pt-6 border-t border-gray-200/50">
               <button
                 type="submit"
-                className="glass-card w-full py-4 px-6 rounded-xl font-medium text-gray-800 hover:neon-soft transition-all duration-300"
+                className="neon-soft w-full py-4 px-6 rounded-xl font-medium text-gray-800 transition-all duration-300"
               >
                 <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -269,24 +269,6 @@ const FormPreview = ({ form }) => {
               </button>
             </div>
           </form>
-        </div>
-
-        {/* Preview Info */}
-        <div className="mt-8 glass-card rounded-2xl p-6">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <svg className="h-6 w-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div className="ml-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Preview Mode</h3>
-              <p className="text-gray-600">
-                This is exactly how your form will appear to end users. 
-                You can test the form functionality, but submissions are not saved.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -19,7 +19,7 @@ const FieldConfigPanel = ({ field, onUpdate, onDelete }) => {
   };
 
   const addOption = () => {
-    const newOptions = [...(field.options || []), { value: '', label: '' }];
+    const newOptions = [...(field.options || []), { value: '' }];
     console.log('Adding option:', newOptions);
     onUpdate({ options: newOptions });
   };
@@ -41,7 +41,7 @@ const FieldConfigPanel = ({ field, onUpdate, onDelete }) => {
           type="text"
           value={field.label || ''}
           onChange={(e) => handleInputChange('label', e.target.value)}
-          className="glass-input w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+          className="glass-input w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all duration-300"
           placeholder="Enter field label"
         />
       </div>
@@ -51,7 +51,7 @@ const FieldConfigPanel = ({ field, onUpdate, onDelete }) => {
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Field Type
         </label>
-        <div className="text-sm text-gray-600 glass-soft px-4 py-3 rounded-xl">
+        <div className="text-sm text-gray-600  px-4 py-3 rounded-xl">
           {field.type.charAt(0).toUpperCase() + field.type.slice(1)}
         </div>
       </div>
@@ -79,7 +79,7 @@ const FieldConfigPanel = ({ field, onUpdate, onDelete }) => {
           type="text"
           value={field.placeholder || ''}
           onChange={(e) => handleInputChange('placeholder', e.target.value)}
-          className="glass-input w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+          className="glass-input w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all duration-300"
           placeholder="Enter placeholder text"
         />
       </div>
@@ -93,7 +93,7 @@ const FieldConfigPanel = ({ field, onUpdate, onDelete }) => {
           value={field.helpText || ''}
           onChange={(e) => handleInputChange('helpText', e.target.value)}
           rows={3}
-          className="glass-input w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical transition-all duration-300"
+          className="glass-input w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200 resize-vertical transition-all duration-300"
           placeholder="Enter help text for users"
         />
       </div>
@@ -258,28 +258,23 @@ const FieldConfigPanel = ({ field, onUpdate, onDelete }) => {
         <div className="space-y-3">
           {(field.options || []).map((option, index) => (
             <div key={index} className="flex items-center space-x-2">
-              <div className="flex-1 grid grid-cols-2 gap-2">
+              <div className="flex-1">
                 <input
                   type="text"
                   value={option.value || ''}
                   onChange={(e) => handleOptionChange(index, 'value', e.target.value)}
-                  placeholder="Value"
-                  className="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-                <input
-                  type="text"
-                  value={option.label || ''}
-                  onChange={(e) => handleOptionChange(index, 'label', e.target.value)}
-                  placeholder="Label"
-                  className="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  placeholder="Enter option value"
+                  className="glass-input w-full px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all duration-300"
                 />
               </div>
               <button
                 onClick={() => removeOption(index)}
-                className="text-red-500 hover:text-red-700 p-1"
+                className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-all duration-300"
                 title="Remove option"
               >
-                🗑️
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
               </button>
             </div>
           ))}
@@ -311,7 +306,7 @@ const FieldConfigPanel = ({ field, onUpdate, onDelete }) => {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="glass-soft border-b border-white/10 p-6">
+      <div className=" px-6 py-3">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-800">Field Settings</h2>
           <button
@@ -330,7 +325,7 @@ const FieldConfigPanel = ({ field, onUpdate, onDelete }) => {
       </div>
 
       {/* Tabs */}
-      <div className="glass-soft border-b border-white/10">
+      <div>
         <nav className="flex space-x-8 px-6">
           {['basic', 'validation', 'options'].map((tab) => {
             const isActive = activeTab === tab;
@@ -356,13 +351,6 @@ const FieldConfigPanel = ({ field, onUpdate, onDelete }) => {
         {activeTab === 'basic' && renderBasicSettings()}
         {activeTab === 'validation' && renderValidationSettings()}
         {activeTab === 'options' && renderOptionsSettings()}
-      </div>
-
-      {/* Footer */}
-      <div className="glass-soft border-t border-white/10 p-6">
-        <div className="text-sm text-gray-600">
-          <p>💡 Changes are applied automatically</p>
-        </div>
       </div>
     </div>
   );

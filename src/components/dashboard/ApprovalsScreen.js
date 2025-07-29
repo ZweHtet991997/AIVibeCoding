@@ -122,7 +122,7 @@ const ApprovalsScreen = () => {
   return (
     <div>
       {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-4 items-center bg-dashboard-cardBg p-4 rounded-lg shadow">
+      <div className="flex flex-col md:flex-row mb-6 gap-4 items-center glass-card p-4 rounded-lg shadow">
         <input
           type="text"
           placeholder="Filter by form name..."
@@ -145,7 +145,7 @@ const ApprovalsScreen = () => {
 
 
       {/* Table */}
-      <div ref={tableRef} className="bg-dashboard-cardBg rounded-lg shadow p-4 overflow-x-auto max-h-[60vh]">
+      <div ref={tableRef} className="glass-card rounded-lg shadow p-4 overflow-x-auto max-h-[60vh]">
         {loading ? (
           <div className="flex justify-center items-center h-32">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
