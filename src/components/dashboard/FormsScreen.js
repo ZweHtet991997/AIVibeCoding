@@ -91,7 +91,7 @@ const FormsScreen = () => {
 
 
   return (
-    <div className="space-y-6">
+    <div>
 
       {/* Filter/Search Section */}
       <div className="flex flex-col md:flex-row md:items-center bg-dashboard-cardBg p-4 rounded-lg shadow justify-between gap-4">

@@ -120,7 +120,7 @@ const ApprovalsScreen = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div>
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 items-center bg-dashboard-cardBg p-4 rounded-lg shadow">
         <input
@@ -253,12 +253,8 @@ const ApprovalsScreen = () => {
               <div className="text-lg font-semibold text-gray-800 mb-3">Form Data</div>
               <div className="bg-white/90 backdrop-blur-md border border-white/20 p-4 rounded-xl shadow-lg h-full overflow-y-auto">
                 <div className="mb-3">
-                  <span className="text-sm font-medium text-gray-600">Field:</span>
-                  <div className="font-semibold text-gray-800 mt-1">{selectedSubmission.originalData?.fieldKey || 'N/A'}</div>
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-gray-600">Response:</span>
-                  <div className="font-semibold text-gray-800 mt-1">{selectedSubmission.originalData?.responseValue || 'N/A'}</div>
+                  <div className="text-sm font-medium text-gray-600 mb-1">{selectedSubmission.originalData?.fieldKey || 'N/A'}</div>
+                  <div className="font-semibold text-gray-800">{selectedSubmission.originalData?.responseValue || 'N/A'}</div>
                 </div>
               </div>
             </div>

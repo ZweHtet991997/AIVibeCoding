@@ -4,6 +4,7 @@ import SignIn from './components/SignIn';
 import AdminDashboard from './components/AdminDashboard';
 import UserHome from './components/UserHome';
 import FormBuilderScreen from './components/dashboard/forms/FormBuilderScreen';
+import FormFiller from './components/FormFiller';
 import BIMBot from './components/BIMBot';
 import { isTokenExpired, getUser, getToken, isAuthenticated, isAdmin, logout } from './utils/auth';
 
@@ -58,6 +59,11 @@ function App() {
           <Route path="/form-builder" element={
             <ProtectedRoute>
               <FormBuilderScreen />
+            </ProtectedRoute>
+          } />
+          <Route path="/fill-form/:formId" element={
+            <ProtectedRoute>
+              <FormFiller />
             </ProtectedRoute>
           } />
           <Route path="*" element={<Navigate to="/" replace />} />

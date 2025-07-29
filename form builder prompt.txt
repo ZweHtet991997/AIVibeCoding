@@ -1,0 +1,50 @@
+Modern Form Builder with Drag & Drop, Live Preview, and JSON-based Saving
+
+I want to design and build a modern, beautiful, and intuitive Form Builder with a card-based, drag-and-drop interface. It should support real-time field configuration, live preview, and be built with scalability and reusability in mind.
+
+Key Design Features
+* Beautiful Color Palette and UI/UX: Consistent with the existing UI/UX design
+* Smooth Animations: Hover effects, drag transitions, and field interactions
+* Card-based Layout: Organized and modular UI for both builder and preview
+* Professional Typography: Clear font hierarchy and great readability
+
+Core Features
+* Drag & Drop Interface: Users can visually build forms by dragging fields
+* Drag to Reorder: Users can rearrange field order via drag handles
+* Field Type Library: Predefined input types (text, number, dropdown, date, file upload, etc.) with icons
+* Real-time Configuration: Side panel allows live editing of field properties
+* Live Preview: Show exactly how the form will look to end users
+* Form Validation: Support for required fields, min/max values, etc.
+* Save/Load Forms: Ability to persist form data to the backend
+
+Saving Form Logic
+* When the user clicks “Save”, the form should be serialized into JSON format
+* This JSON will be sent in the request body of a backend API (API details will be provided later)
+* This will allow us to store the form in the database for future retrieval
+* Later, when a user wants to fill out that form, we will fetch the saved JSON from the backend and render the form dynamically
+
+Form Filling Interface (End User View)
+* Design a separate interface for form respondents (end users):
+* Clean, distraction-free layout
+* Render form fields based on JSON from the backend
+* Required fields should be clearly marked
+* “Submit” button at the bottom
+* Include error messages and validation feedback inline
+
+Field Customization
+* Fields should allow editing of:
+  * Label
+  * Placeholder Text
+  * Validation Settings (required checkbox, min/max for numbers)
+  * Field-specific Options (e.g., dropdown options)
+
+Form Header Customization
+* Form Name: Editable directly from the top section
+* Form Description: Editable below the title
+
+Development Note
+* For now, you don’t need to implement actual backend API integration.
+* Just simulate the save to JSON logic and be ready to send it when the API is available.
+* The saved JSON format should be easy to reuse for rendering the form during the filling phase.
+
+
