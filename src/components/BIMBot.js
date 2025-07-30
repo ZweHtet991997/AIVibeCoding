@@ -129,7 +129,7 @@ const BIMBot = () => {
                   <div className={`rounded-xl px-4 py-2 text-sm shadow-md ${
                     msg.sender === 'bot' 
                       ? 'bg-white/90 backdrop-blur-md border border-white/20 text-gray-800' 
-                      : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
+                      : 'bg-gradient-to-r from-blue-400 to-purple-500 text-white'
                   } ${msg.sender === 'user' ? 'rounded-br-md' : 'rounded-bl-md'}`}>
                     {msg.text}
                   </div>
@@ -170,7 +170,7 @@ const BIMBot = () => {
               className={`rounded-xl px-4 py-2 font-medium shadow-md transition-all duration-300 ${
                 loading || !input.trim()
                   ? 'bg-gray-200 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:neon-soft text-white'
+                  : 'bg-gradient-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 hover:neon-soft text-white'
               }`}
               onClick={handleSend}
               disabled={loading || !input.trim()}

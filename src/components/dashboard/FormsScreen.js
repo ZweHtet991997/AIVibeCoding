@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FormListTable from './forms/FormListTable';
 import AssignUsersModal from './forms/AssignUsersModal';
+import ErrorModal from '../common/ErrorModal';
 
 import { isAdmin } from '../../utils/auth';
 import { formsAPI } from '../../utils/api';
@@ -19,6 +20,7 @@ const FormsScreen = () => {
   const [error, setError] = useState('');
   const [publishingForms, setPublishingForms] = useState({});
   const [publishConfirmModal, setPublishConfirmModal] = useState({ open: false, form: null });
+  const [errorModal, setErrorModal] = useState({ open: false, error: '', title: 'Error' });
   const navigate = useNavigate();
 
   // Fetch forms with assigned user counts
@@ -107,20 +109,32 @@ const FormsScreen = () => {
       // Set loading state for this specific form
       setPublishingForms(prev => ({ ...prev, [form.formId]: true }));
       
-      // TODO: Implement publish form API call
-      console.log('Publishing form:', form);
+      // Call the API to activate the form
+      await formsAPI.activateForm(form.formId);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Update the form status in the local state immediately for real-time UI update
+      setForms(prevForms => 
+        prevForms.map(f => 
+          f.formId === form.formId 
+            ? { ...f, status: 'Active' }
+            : f
+        )
+      );
       
-      alert(`Publishing form: ${form.formName}`);
-      // This will be replaced with actual API call when endpoint is provided
+      // Show success message
+      setErrorModal({
+        open: true,
+        error: `Form "${form.formName}" published successfully!`,
+        title: 'Success'
+      });
       
-      // Refresh forms list after publishing
-      await fetchForms();
     } catch (error) {
       console.error('Error publishing form:', error);
-      alert(`Error publishing form: ${error.message}`);
+      setErrorModal({
+        open: true,
+        error: error.message,
+        title: 'Publish Error'
+      });
     } finally {
       // Clear loading state for this form
       setPublishingForms(prev => ({ ...prev, [form.formId]: false }));
@@ -189,6 +203,22 @@ const FormsScreen = () => {
         onClose={handleCloseAssignUsers}
         form={selectedForm}
         onSaveSuccess={fetchForms}
+      />
+
+      {/* Error/Success Modal */}
+      <ErrorModal
+        open={errorModal.open}
+        onClose={() => {
+          setErrorModal({ open: false, error: '', title: 'Error' });
+          // Navigate to form builder on success
+          if (errorModal.title === 'Success') {
+            // Stay on current page, just close the modal
+          }
+        }}
+        error={errorModal.error}
+        title={errorModal.title}
+        showRetry={errorModal.title === 'Publish Error'}
+        onRetry={errorModal.title === 'Publish Error' ? handleConfirmPublish : undefined}
       />
 
       {/* Publish Confirmation Modal */}

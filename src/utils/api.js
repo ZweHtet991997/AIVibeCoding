@@ -306,20 +306,49 @@ export const formsAPI = {
         }
       }
 
-      // Check if response has content before parsing JSON
-      const contentType = response.headers.get('content-type');
-      console.log('Remove user response status:', response.status);
-      console.log('Remove user response content-type:', contentType);
-      
-      if (contentType && contentType.includes('application/json')) {
-        const data = await response.json();
-        return data;
-      } else {
-        // For successful DELETE operations that don't return JSON
-        return { success: true, message: 'User removed from form successfully' };
-      }
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error('Error removing user from form:', error);
+      throw error;
+    }
+  },
+
+  // Activate form (change status from Draft to Active)
+  async activateForm(formId) {
+    try {
+      const token = getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch(`${apiConfig.baseUrl}/api/v1/form/activate?formId=${formId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Unauthorized access. Please log in again.');
+        } else if (response.status === 403) {
+          throw new Error('Access denied. Admin privileges required.');
+        } else if (response.status === 404) {
+          throw new Error('Form not found.');
+        } else if (response.status === 400) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Invalid form data');
+        } else {
+          throw new Error(`Failed to activate form: ${response.status}`);
+        }
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error activating form:', error);
       throw error;
     }
   }

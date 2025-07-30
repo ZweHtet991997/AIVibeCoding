@@ -141,7 +141,7 @@ const AdminDashboard = () => {
             <div key={item.name} className="animate-slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
               <button
                 onClick={() => setActiveMenu(item.name)}
-                className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-300 group ${
+                className={`w-full flex items-center px-3 py-3 rounded-xl transition-all duration-300 group ${
                   activeMenu === item.name
                     ? 'glass-card text-gray-800 neon-soft'
                     : 'glass-button text-gray-600 hover:text-gray-800'

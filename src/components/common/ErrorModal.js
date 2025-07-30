@@ -98,7 +98,7 @@ const ErrorModal = ({ open, onClose, error, title = 'Error', showRetry = false, 
             onClick={onClose}
             className={`px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 ${
               isSuccess
-                ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white'
+                ? 'bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white'
                 : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white'
             }`}
           >
