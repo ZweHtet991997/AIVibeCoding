@@ -45,16 +45,16 @@ export default function UserListScreen() {
     return (
       <div className="space-y-6">
         {/* Filter/Search Section - Show even during loading */}
-        <div className="flex flex-col md:flex-row gap-4 items-center bg-dashboard-cardBg p-4 rounded-lg shadow">
+        <div className="flex flex-col md:flex-row gap-4 items-center bg-white/60 p-4 rounded-lg shadow">
           <input
             type="text"
             placeholder="Search by username or email..."
             disabled
-            className="w-full md:w-1/3 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-100"
+            className="w-full md:w-1/3 px-4 py-2 bg-transparent border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-100"
           />
           <select
             disabled
-            className="w-full md:w-1/4 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-100"
+            className="w-full md:w-1/4 px-4 py-2 bg-transparent border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-100"
           >
             <option value="">All Statuses</option>
             <option value="Active">Active</option>
@@ -63,7 +63,7 @@ export default function UserListScreen() {
         </div>
 
         {/* Table Section with Loading */}
-        <div className="bg-dashboard-cardBg rounded-lg shadow p-4">
+        <div className="bg-white/60 rounded-lg shadow p-4">
           <div className="flex justify-center items-center h-32">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
             <span className="ml-4 text-primary-600 font-medium">Loading users...</span>
@@ -77,16 +77,16 @@ export default function UserListScreen() {
     return (
       <div className="space-y-6">
         {/* Filter/Search Section - Show even during error */}
-        <div className="flex flex-col md:flex-row gap-4 items-center bg-dashboard-cardBg p-4 rounded-lg shadow">
+        <div className="flex flex-col md:flex-row gap-4 items-center bg-white/60 p-4 rounded-lg shadow">
           <input
             type="text"
             placeholder="Search by username or email..."
             disabled
-            className="w-full md:w-1/3 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-100"
+            className="w-full md:w-1/3 px-4 py-2 bg-transparent border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-100"
           />
           <select
             disabled
-            className="w-full md:w-1/4 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-100"
+            className="w-full md:w-1/4 px-4 py-2 bg-transparent border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-100"
           >
             <option value="">All Statuses</option>
             <option value="Active">Active</option>
@@ -95,7 +95,7 @@ export default function UserListScreen() {
         </div>
 
         {/* Table Section with Error */}
-        <div className="bg-dashboard-cardBg rounded-lg shadow p-4">
+        <div className="bg-white/60 rounded-lg shadow p-4">
           <div className="text-center py-8">
             <div className="text-red-600 mb-2">{error}</div>
             <button 
@@ -113,18 +113,18 @@ export default function UserListScreen() {
   return (
     <div className="space-y-6">
       {/* Filter/Search Section */}
-      <div className="flex flex-col md:flex-row gap-4 items-center bg-dashboard-cardBg p-4 rounded-lg shadow">
+      <div className="flex flex-col md:flex-row gap-4 items-center bg-white/60 p-4 rounded-lg shadow">
         <input
           type="text"
           placeholder="Search by username or email..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full md:w-1/3 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full md:w-1/3 px-4 py-2 border bg-transparent border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
         />
         <select
           value={status}
           onChange={e => setStatus(e.target.value)}
-          className="w-full md:w-1/4 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full md:w-1/4 px-4 py-2 border bg-transparent border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
         >
           <option value="">All Statuses</option>
           <option value="Active">Active</option>
@@ -133,9 +133,9 @@ export default function UserListScreen() {
       </div>
 
       {/* Table Section */}
-      <div className="bg-dashboard-cardBg rounded-lg shadow p-4 overflow-x-auto">
+      <div className="bg-white/60 rounded-lg shadow p-4 overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead>
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-dashboard-headerText uppercase tracking-wider">Username</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-dashboard-headerText uppercase tracking-wider">Email</th>
@@ -144,7 +144,7 @@ export default function UserListScreen() {
               <th className="px-6 py-3 text-left text-xs font-medium text-dashboard-headerText uppercase tracking-wider">Status</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-200">
             {filteredUsers.length === 0 ? (
               <tr>
                 <td colSpan="5" className="px-6 py-4 text-center text-gray-400">

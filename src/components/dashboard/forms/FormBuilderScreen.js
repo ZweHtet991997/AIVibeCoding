@@ -4,7 +4,9 @@ import FormBuilderToolbar from './components/FormBuilderToolbar';
 import FormBuilderCanvas from './components/FormBuilderCanvas';
 import FormPreview from './components/FormPreview';
 import FieldConfigPanel from './components/FieldConfigPanel';
+import ErrorModal from '../../common/ErrorModal';
 import { formsAPI } from '../../../utils/api';
+import apiConfig from '../../../config';
 
 const FormBuilderScreen = () => {
   const { formId } = useParams();
@@ -18,6 +20,7 @@ const FormBuilderScreen = () => {
   const [loading, setLoading] = useState(!!formId);
   const [saving, setSaving] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
+  const [errorModal, setErrorModal] = useState({ open: false, error: '', title: 'Error' });
 
   useEffect(() => {
     if (formId) {
@@ -171,9 +174,27 @@ const FormBuilderScreen = () => {
     try {
       setSaving(true);
       
-      // Generate form data with metadata
-      const formData = {
-        id: form.id || `form_${Date.now()}`,
+      // Generate formId: formName + currentDateTime(ddmmyyss) + milliseconds for uniqueness
+      const now = new Date();
+      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const year = String(now.getFullYear()).slice(-2);
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
+      const formNameClean = (form.name || 'UntitledForm').replace(/[^a-zA-Z0-9]/g, '');
+      const formId = `${formNameClean}${day}${month}${year}${seconds}${milliseconds}`;
+      
+      console.log('Generated formId:', formId);
+      console.log('Form name:', form.name);
+      console.log('Cleaned form name:', formNameClean);
+      console.log('Current date/time:', `${day}/${month}/${year} ${seconds}s`);
+      
+      // Generate formUrl: {{baseFrontendUrl}}/form/fill/{formId}
+      const formUrl = `${apiConfig.frontendUrl}/form/fill/${formId}`;
+      
+      // Generate form schema with metadata
+      const formSchema = {
+        id: formId,
         name: form.name || 'Untitled Form',
         description: form.description || '',
         fields: form.fields || [],
@@ -190,29 +211,36 @@ const FormBuilderScreen = () => {
         }
       };
 
-      // Create JSON blob
-      const jsonString = JSON.stringify(formData, null, 2);
-      const blob = new Blob([jsonString], { type: 'application/json' });
+      // Prepare request body according to API requirements
+      const requestBody = {
+        formName: form.name || 'Untitled Form',
+        formSchema: JSON.stringify(formSchema),
+        status: 'Draft',
+        formUrl: formUrl
+      };
+
+      console.log('Request body being sent:', requestBody);
+      console.log('Form schema length:', requestBody.formSchema.length);
+
+      // Call the API to create the form
+      const result = await formsAPI.createForm(requestBody);
       
-      // Create download link
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${formData.name.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.json`;
+      console.log('Form created successfully:', result);
+      console.log('Form URL generated:', formUrl);
       
-      // Trigger download
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      // Clean up
-      URL.revokeObjectURL(url);
-      
-      console.log('Form saved as JSON:', formData);
-      alert('Form saved successfully! JSON file downloaded.');
+      // Show success message and wait for user to close
+      setErrorModal({
+        open: true,
+        error: 'Form saved successfully!',
+        title: 'Success'
+      });
     } catch (error) {
       console.error('Error saving form:', error);
-      alert('Error saving form. Please try again.');
+      setErrorModal({
+        open: true,
+        error: error.message,
+        title: 'Form Creation Error'
+      });
     } finally {
       setSaving(false);
     }
@@ -329,6 +357,21 @@ const FormBuilderScreen = () => {
           )}
         </div>
       </div>
+
+      {/* Error Modal */}
+      <ErrorModal
+        open={errorModal.open}
+        onClose={() => {
+          setErrorModal({ open: false, error: '', title: 'Error' });
+          if (errorModal.title === 'Success') {
+            navigate('/admin-dashboard', { state: { activeMenu: 'Forms' } });
+          }
+        }}
+        error={errorModal.error}
+        title={errorModal.title}
+        showRetry={errorModal.title === 'Form Creation Error'}
+        onRetry={errorModal.title === 'Form Creation Error' ? handleSaveForm : undefined}
+      />
     </div>
   );
 };

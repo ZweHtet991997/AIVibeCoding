@@ -122,18 +122,18 @@ const ApprovalsScreen = () => {
   return (
     <div>
       {/* Filters */}
-      <div className="flex flex-col md:flex-row mb-6 gap-4 items-center glass-card p-4 rounded-lg shadow">
+      <div className="flex flex-col md:flex-row mb-6 gap-4 items-center bg-white/60 p-4 rounded-lg shadow">
         <input
           type="text"
           placeholder="Filter by form name..."
           value={filters.formName}
           onChange={e => setFilters(f => ({ ...f, formName: e.target.value }))}
-          className="w-full md:w-1/3 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full md:w-1/3 px-4 py-2 bg-transparent border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
         />
         <select
           value={filters.status}
           onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}
-          className="w-full md:w-1/4 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full md:w-1/4 px-4 py-2 bg-transparent border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
         >
           <option value="">All Statuses</option>
           {statusOptions.map(opt => (
@@ -145,7 +145,7 @@ const ApprovalsScreen = () => {
 
 
       {/* Table */}
-      <div ref={tableRef} className="glass-card rounded-lg shadow p-4 overflow-x-auto max-h-[60vh]">
+      <div ref={tableRef} className="bg-white/60 rounded-lg shadow p-4 overflow-x-auto max-h-[60vh]">
         {loading ? (
           <div className="flex justify-center items-center h-32">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
@@ -218,9 +218,9 @@ const ApprovalsScreen = () => {
       {/* Detail Modal */}
       {modalOpen && selectedSubmission && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setModalOpen(false)}>
-          <div className="bg-white/95 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl w-full max-w-2xl h-[600px] p-8 relative animate-scale-in flex flex-col" onClick={(e) => e.stopPropagation()}>
+          <div className="soft-bg backdrop-blur-md border border-white/20 rounded-2xl shadow-xl w-full max-w-2xl h-[600px] p-8 relative animate-scale-in flex flex-col" onClick={(e) => e.stopPropagation()}>
             <button
-              className="absolute top-4 right-4 glass-button rounded-lg p-2 text-gray-600 hover:text-gray-800 hover:neon-soft transition-all duration-300"
+              className="absolute top-4 right-4 glass-input rounded-lg p-2 text-gray-600 hover:text-gray-800 hover:neon-soft transition-all duration-300"
               onClick={() => setModalOpen(false)}
               aria-label="Close"
             >
@@ -251,7 +251,7 @@ const ApprovalsScreen = () => {
             </div>
             <div className="mb-6 flex-1 overflow-hidden">
               <div className="text-lg font-semibold text-gray-800 mb-3">Form Data</div>
-              <div className="bg-white/90 backdrop-blur-md border border-white/20 p-4 rounded-xl shadow-lg h-full overflow-y-auto">
+              <div className="glass-input backdrop-blur-md border border-white/20 p-4 rounded-xl shadow-lg h-full overflow-y-auto">
                 <div className="mb-3">
                   <div className="text-sm font-medium text-gray-600 mb-1">{selectedSubmission.originalData?.fieldKey || 'N/A'}</div>
                   <div className="font-semibold text-gray-800">{selectedSubmission.originalData?.responseValue || 'N/A'}</div>
@@ -274,7 +274,7 @@ const ApprovalsScreen = () => {
                 </div>
                 <div className="flex gap-2 justify-end">
                   <button
-                    className="flex items-center gap-1.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-60"
+                    className="flex items-center gap-1.5 bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-60"
                     onClick={() => handleAction('Approved')}
                     disabled={actionLoading}
                   >
@@ -282,7 +282,7 @@ const ApprovalsScreen = () => {
                     {actionLoading ? 'Approving...' : 'Approve'}
                   </button>
                   <button
-                    className="flex items-center gap-1.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-60"
+                    className="flex items-center gap-1.5 bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-60"
                     onClick={() => handleAction('Rejected')}
                     disabled={actionLoading}
                   >
@@ -294,7 +294,7 @@ const ApprovalsScreen = () => {
             ) : (
               <div className="mb-6">
                 <div className="text-lg font-semibold text-gray-800 mb-3">Admin Comment</div>
-                <div className="bg-white/90 backdrop-blur-md border border-white/20 p-4 rounded-xl shadow-lg text-sm text-gray-700 min-h-[3rem]">
+                <div className="glass-input backdrop-blur-md border border-white/20 p-4 rounded-xl text-sm text-gray-700 min-h-[3rem]">
                   {selectedSubmission.comment || <span className="text-gray-400">No comment provided</span>}
                 </div>
               </div>

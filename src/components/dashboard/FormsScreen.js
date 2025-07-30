@@ -17,6 +17,8 @@ const FormsScreen = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [publishingForms, setPublishingForms] = useState({});
+  const [publishConfirmModal, setPublishConfirmModal] = useState({ open: false, form: null });
   const navigate = useNavigate();
 
   // Fetch forms with assigned user counts
@@ -89,26 +91,63 @@ const FormsScreen = () => {
     setIsAssignUsersOpen(false);
   };
 
+  const handlePublishForm = (form) => {
+    // Show confirmation modal first
+    setPublishConfirmModal({ open: true, form });
+  };
+
+  const handleConfirmPublish = async () => {
+    const form = publishConfirmModal.form;
+    if (!form) return;
+
+    try {
+      // Close confirmation modal
+      setPublishConfirmModal({ open: false, form: null });
+      
+      // Set loading state for this specific form
+      setPublishingForms(prev => ({ ...prev, [form.formId]: true }));
+      
+      // TODO: Implement publish form API call
+      console.log('Publishing form:', form);
+      
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      alert(`Publishing form: ${form.formName}`);
+      // This will be replaced with actual API call when endpoint is provided
+      
+      // Refresh forms list after publishing
+      await fetchForms();
+    } catch (error) {
+      console.error('Error publishing form:', error);
+      alert(`Error publishing form: ${error.message}`);
+    } finally {
+      // Clear loading state for this form
+      setPublishingForms(prev => ({ ...prev, [form.formId]: false }));
+    }
+  };
+
 
   return (
     <div>
 
       {/* Filter/Search Section */}
-      <div className="flex flex-col mb-6 md:flex-row md:items-center glass-card p-4 rounded-lg shadow justify-between gap-4">
+      <div className="flex flex-col mb-6 md:flex-row md:items-center bg-white/60 p-4 rounded-lg shadow justify-between gap-4">
         <div className="flex flex-col md:flex-row gap-4 flex-1">
           <input
             type="text"
             placeholder="Search by form name..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full md:w-64 px-4 py-2 bg-transparent border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
-            className="w-full md:w-1/4 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full md:w-1/4 px-4 py-2 bg-transparent border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             <option value="">All Statuses</option>
+            <option value="Draft">Draft</option>
             <option value="Active">Active</option>
             <option value="Inactive">Inactive</option>
           </select>
@@ -124,7 +163,7 @@ const FormsScreen = () => {
       </div>
 
       {/* Table Section */}
-      <div className="glass-card rounded-lg shadow p-4">
+      <div className="bg-white/60 rounded-lg shadow p-4">
         {loading ? (
           <div className="flex justify-center items-center h-32">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
@@ -138,6 +177,8 @@ const FormsScreen = () => {
           <FormListTable
             forms={filteredForms}
             onAssignUsers={handleOpenAssignUsers}
+            onPublishForm={handlePublishForm}
+            publishingForms={publishingForms}
           />
         )}
       </div>
@@ -149,6 +190,46 @@ const FormsScreen = () => {
         form={selectedForm}
         onSaveSuccess={fetchForms}
       />
+
+      {/* Publish Confirmation Modal */}
+      {publishConfirmModal.open && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="soft-bg backdrop-blur-md border border-white/20 rounded-2xl shadow-xl w-full max-w-md p-8 relative animate-scale-in">
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 bg-gradient-to-r from-orange-400 to-red-400 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                </svg>
+              </div>
+            </div>
+            
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                Publish Form
+              </h2>
+              <p className="text-gray-600">
+                Are you sure you want to publish "{publishConfirmModal.form?.formName}"? 
+                This will make the form available for users to fill out.
+              </p>
+            </div>
+            
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => setPublishConfirmModal({ open: false, form: null })}
+                className="glass-card rounded-xl px-4 py-2 font-medium text-gray-800 hover:neon-soft transition-all duration-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmPublish}
+                className="bg-gradient-to-r from-orange-400 to-red-500 hover:from-orange-500 hover:to-red-600 text-white px-4 py-2 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                Publish Form
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

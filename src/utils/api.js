@@ -117,6 +117,61 @@ export const formsAPI = {
     }
   },
 
+  // Create new form
+  async createForm(formData) {
+    try {
+      const token = getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      console.log('Creating form with data:', formData);
+
+      const response = await fetch(`${apiConfig.baseUrl}/api/v1/form/createform`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
+      });
+
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        let errorMessage = `Failed to create form: ${response.status}`;
+        
+        try {
+          const errorData = await response.json();
+          console.log('Error response data:', errorData);
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (parseError) {
+          console.log('Could not parse error response as JSON');
+        }
+
+        if (response.status === 401) {
+          throw new Error('Unauthorized access. Please log in again.');
+        } else if (response.status === 403) {
+          throw new Error('Access denied. Admin privileges required.');
+        } else if (response.status === 400) {
+          throw new Error(errorMessage);
+        } else if (response.status === 409) {
+          throw new Error(`Form creation conflict: ${errorMessage}. This might be due to a duplicate form name or ID.`);
+        } else {
+          throw new Error(errorMessage);
+        }
+      }
+
+      const data = await response.json();
+      console.log('Form created successfully:', data);
+      return data;
+    } catch (error) {
+      console.error('Error creating form:', error);
+      throw error;
+    }
+  },
+
   // Get form by ID for editing
   async getFormById(formId) {
     try {

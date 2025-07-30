@@ -136,9 +136,9 @@ const AssignUsersModal = ({ open, onClose, form, onSaveSuccess }) => {
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="bg-white/95 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl w-full max-w-lg p-8 relative animate-scale-in" onClick={(e) => e.stopPropagation()}>
+      <div className="soft-bg backdrop-blur-md border border-white/20 rounded-2xl shadow-xl w-full max-w-lg p-8 relative animate-scale-in" onClick={(e) => e.stopPropagation()}>
         <button
-          className="absolute top-4 right-4 glass-button rounded-lg p-2 text-gray-600 hover:text-gray-800 hover:neon-soft transition-all duration-300"
+          className="absolute top-4 right-4 glass-input rounded-lg p-2 text-gray-600 hover:text-gray-800 hover:neon-soft transition-all duration-300"
           onClick={onClose}
           aria-label="Close"
         >
@@ -188,7 +188,7 @@ const AssignUsersModal = ({ open, onClose, form, onSaveSuccess }) => {
           /* User List */
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-3">Select Users</label>
-            <div className="max-h-60 overflow-y-auto bg-white/90 backdrop-blur-md border border-white/20 rounded-xl p-4 shadow-lg">
+            <div className="max-h-60 overflow-y-auto bg-white/90 backdrop-blur-md border border-white/20 rounded-xl p-4">
               {filteredUsers.length === 0 ? (
                 <div className="text-center py-8">
                   <div className="w-12 h-12 bg-gradient-to-r from-gray-300 to-gray-400 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -235,14 +235,14 @@ const AssignUsersModal = ({ open, onClose, form, onSaveSuccess }) => {
         {/* Action Buttons */}
         <div className="flex justify-end gap-3">
           <button
-            className="glass-button px-6 py-3 rounded-xl font-medium text-gray-700 hover:text-gray-900 hover:neon-soft transition-all duration-300"
+            className="glass-button px-4 py-2 rounded-xl font-medium text-gray-700 hover:text-gray-900 hover:neon-soft transition-all duration-300"
             onClick={onClose}
             disabled={saving}
           >
             Cancel
           </button>
           <button
-            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-60 flex items-center"
+            className="bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white px-4 py-2 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-60 flex items-center"
             onClick={handleSave}
             disabled={loading || saving || filteredUsers.length === 0}
           >

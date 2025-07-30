@@ -13,7 +13,7 @@ const StatisticsChart = () => {
   const maxValue = Math.max(...data.map(d => Math.max(d.formsCreated, d.submissions)));
 
   return (
-    <div className="glass-card rounded-2xl p-6 h-full">
+    <div className="bg-white/60 glass-card rounded-2xl p-6 h-full">
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>

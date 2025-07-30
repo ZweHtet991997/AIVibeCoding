@@ -81,7 +81,7 @@ const ApprovalStatusChart = () => {
   const total = data.reduce((sum, item) => sum + item.count, 0);
 
   return (
-    <div className="glass-card rounded-2xl p-6 h-full">
+    <div className="bg-white/60 glass-card rounded-2xl p-6 h-full">
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -201,7 +201,7 @@ const ApprovalStatusChart = () => {
           {/* Legend */}
           <div className="flex-1 space-y-4">
             {data.map((item, index) => (
-              <div key={index} className="glass-button rounded-xl p-3 group hover:scale-105 transition-all duration-300">
+              <div key={index} className="glass-card rounded-xl p-3 group hover:scale-105 transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <div className={`w-4 h-4 bg-gradient-to-r ${item.gradient} rounded-full mr-3`}></div>
