@@ -8,7 +8,8 @@
         public int TotalApproved { get; set; }
         public int TotalRejected { get; set; }
         public ApprovalStatusBreakdownDto ApprovalStatusBreakdown { get; set; }
-        // Optionally: public List<SubmissionsOverTimeDto> SubmissionsOverTime { get; set; }
+        public List<TopFormResponsesDto> TopFormResponses { get; set; } // Top 5 form responses
+        public List<BarChartDataDto> BarChartData { get; set; } // Bar chart data for forms
     }
 
     public class ApprovalStatusBreakdownDto
@@ -22,5 +23,21 @@
     {
         public int Count { get; set; }
         public double Percentage { get; set; }
+    }
+
+    public class TopFormResponsesDto
+    {
+        public string UserName { get; set; }
+        public string FormName { get; set; }
+        public DateTime ResponseDate { get; set; }
+        public string ApprovalStatus { get; set; }
+    }
+
+    public class BarChartDataDto
+    {
+        public string FormName { get; set; }
+        public int TotalAssigned { get; set; }
+        public int Submitted { get; set; }
+        public int NotSubmitted { get; set; }
     }
 }

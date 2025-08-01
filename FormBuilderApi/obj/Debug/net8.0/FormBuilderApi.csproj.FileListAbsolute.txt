@@ -145,3 +145,4 @@ C:\Myprojects\FormBuilderApi\FormBuilderApi\obj\Debug\net8.0\refint\FormBuilderA
 C:\Myprojects\FormBuilderApi\FormBuilderApi\obj\Debug\net8.0\FormBuilderApi.pdb
 C:\Myprojects\FormBuilderApi\FormBuilderApi\obj\Debug\net8.0\FormBuilderApi.genruntimeconfig.cache
 C:\Myprojects\FormBuilderApi\FormBuilderApi\obj\Debug\net8.0\ref\FormBuilderApi.dll
+C:\Myprojects\FormBuilderApi\FormBuilderApi\obj\Debug\net8.0\FormBuilderApi.sourcelink.json

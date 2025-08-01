@@ -13,6 +13,9 @@ namespace FormBuilderApi.Entities
         [MaxLength(200)]
         public string FormName { get; set; }
 
+        [MaxLength(500)]
+        public string? Description { get; set; }
+
         [Required]
         public string FormSchema { get; set; }
 
@@ -22,5 +25,8 @@ namespace FormBuilderApi.Entities
         [Required]
         [MaxLength(50)]
         public string Status { get; set; }
+
+        [MaxLength(250)]
+        public string? FormUrl { get; set; }
     }
 }

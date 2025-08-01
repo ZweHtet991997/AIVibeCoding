@@ -4,6 +4,6 @@ namespace FormBuilderApi.Services.AuthServices
 {
     public interface IAuthService
     {
-        Task<string> AuthenticateAsync(string email, string password);
+        Task<LoginResponseDto> AuthenticateAsync(string email, string password);
     }
 }

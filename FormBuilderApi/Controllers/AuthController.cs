@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FormBuilderApi.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v1/auth")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -18,11 +18,11 @@ namespace FormBuilderApi.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto dto)
         {
-            var token = await _authService.AuthenticateAsync(dto.Email, dto.Password);
-            if (token == null)
+            var response = await _authService.AuthenticateAsync(dto.Email, dto.Password);
+            if (response == null)
                 return Unauthorized(new { message = "Invalid email or password" });
 
-            return Ok(new { token });
+            return Ok(response);
         }
     }
 }

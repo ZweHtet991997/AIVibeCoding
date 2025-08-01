@@ -21,5 +21,7 @@ namespace FormBuilderApi.Entities
 
         [Required]
         public string ResponseValue { get; set; }
+        [Required]
+        public DateTime ResponseDate { get; set; }
     }
 }

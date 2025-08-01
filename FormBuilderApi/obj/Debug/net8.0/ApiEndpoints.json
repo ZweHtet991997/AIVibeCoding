@@ -1,8 +1,90 @@
 [
   {
+    "ContainingType": "FormBuilderApi.Controllers.EncryptionController",
+    "Method": "Decrypt",
+    "RelativePath": "api/Encryption/decrypt",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "FormBuilderApi.Controllers.EncryptionController\u002BDecryptRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "FormBuilderApi.Controllers.EncryptionController\u002BDecryptResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "FormBuilderApi.Controllers.EncryptionController",
+    "Method": "Encrypt",
+    "RelativePath": "api/Encryption/encrypt",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "FormBuilderApi.Controllers.EncryptionController\u002BEncryptRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "FormBuilderApi.Controllers.EncryptionController\u002BEncryptResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "FormBuilderApi.Controllers.AdminDashboardController",
+    "Method": "GetDashboard",
+    "RelativePath": "api/v1/admin/dashboard",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "FormBuilderApi.Models.AdminDashboardDto",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "FormBuilderApi.Controllers.AdminDashboardController",
+    "Method": "GetNormalUsers",
+    "RelativePath": "api/v1/admin/userlist",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "FormBuilderApi.Controllers.AuthController",
     "Method": "Login",
-    "RelativePath": "api/Auth/login",
+    "RelativePath": "api/v1/auth/login",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -10,6 +92,159 @@
       {
         "Name": "dto",
         "Type": "FormBuilderApi.Models.LoginRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FormBuilderApi.Controllers.FormController",
+    "Method": "GetUsersAssignedToForm",
+    "RelativePath": "api/v1/form/{formId}/assignments",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "formId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FormBuilderApi.Controllers.FormController",
+    "Method": "ActivateForm",
+    "RelativePath": "api/v1/form/activate",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "formId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FormBuilderApi.Controllers.FormController",
+    "Method": "ApproveOrReject",
+    "RelativePath": "api/v1/form/approve-reject",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "FormBuilderApi.Models.FormResponseApprovalRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FormBuilderApi.Controllers.FormController",
+    "Method": "AssignForm",
+    "RelativePath": "api/v1/form/assignform",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "FormBuilderApi.Models.FormAssignmentRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FormBuilderApi.Controllers.FormController",
+    "Method": "CreateForm",
+    "RelativePath": "api/v1/form/createform",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "FormBuilderApi.Models.CreateFormRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FormBuilderApi.Controllers.FormController",
+    "Method": "GetForms",
+    "RelativePath": "api/v1/form/formlist",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FormBuilderApi.Controllers.FormController",
+    "Method": "GetAllResponses",
+    "RelativePath": "api/v1/form/formresponse",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FormBuilderApi.Controllers.FormController",
+    "Method": "RemoveAssignment",
+    "RelativePath": "api/v1/form/removeassign",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "formId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FormBuilderApi.Controllers.UserController",
+    "Method": "GetUserAssignedForms",
+    "RelativePath": "api/v1/user/assigned/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FormBuilderApi.Controllers.UserController",
+    "Method": "GetUserSubmittedResponses",
+    "RelativePath": "api/v1/user/submitted/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
         "IsRequired": true
       }
     ],

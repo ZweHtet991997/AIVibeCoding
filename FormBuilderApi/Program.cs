@@ -1,5 +1,7 @@
 using FormBuilderApi.Entities;
 using FormBuilderApi.Models;
+using FormBuilderApi.Services;
+using FormBuilderApi.Services.Admin;
 using FormBuilderApi.Services.AuthServices;
 using FormBuilderApi.Services.Dashboard;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -44,6 +46,20 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IFormService, FormService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAesEncryptionService, AesEncryptionService>();
+
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
 
@@ -53,6 +69,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
 

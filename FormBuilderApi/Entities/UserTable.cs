@@ -25,5 +25,9 @@ namespace FormBuilderApi.Entities
         [Required]
         [MaxLength(50)]
         public string Role { get; set; }
+
+        [Required]
+        [MaxLength(50)]
+        public string Status { get; set; }
     }
 }
