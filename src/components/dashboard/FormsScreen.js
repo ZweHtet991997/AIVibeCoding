@@ -168,7 +168,7 @@ const FormsScreen = () => {
         </div>
         <div className="flex-shrink-0">
           <button
-            className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg font-medium shadow w-full md:w-auto"
+            className="bg-blue-400 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium shadow w-full md:w-auto"
             onClick={handleCreateNewForm}
           >
             + Create New Form
@@ -226,7 +226,7 @@ const FormsScreen = () => {
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="soft-bg backdrop-blur-md border border-white/20 rounded-2xl shadow-xl w-full max-w-md p-8 relative animate-scale-in">
             <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 bg-gradient-to-r from-orange-400 to-red-400 rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-orange-300 to-orange-400 rounded-full flex items-center justify-center">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                 </svg>
@@ -252,7 +252,7 @@ const FormsScreen = () => {
               </button>
               <button
                 onClick={handleConfirmPublish}
-                className="bg-gradient-to-r from-orange-400 to-red-500 hover:from-orange-500 hover:to-red-600 text-white px-4 py-2 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+                className="bg-gradient-to-r from-orange-300 to-orange-400 hover:from-orange-400 hover:to-orange-500 text-white px-4 py-2 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 Publish Form
               </button>

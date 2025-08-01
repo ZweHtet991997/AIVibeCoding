@@ -1,27 +1,65 @@
 import React, { useState, useEffect } from 'react';
+import { dashboardAPI } from '../../utils/api';
 
 const StatisticsChart = () => {
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Load empty data
+  // Load dashboard data
   useEffect(() => {
-    setData([]);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError('');
+        const dashboardData = await dashboardAPI.getDashboardData();
+        setData(dashboardData.barChartData || []);
+      } catch (err) {
+        console.error('Error fetching statistics data:', err);
+        setError(err.message || 'Failed to load statistics data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  const maxValue = Math.max(...data.map(d => Math.max(d.formsCreated, d.submissions)));
+  // Chart configuration
+  const chartConfig = {
+    width: 600,
+    height: 200,
+    margin: { top: 20, right: 30, bottom: 60, left: 60 },
+    barWidth: 25,
+    barGap: 8,
+    groupGap: 40,
+  };
+
+  const chartWidth = chartConfig.width - chartConfig.margin.left - chartConfig.margin.right;
+  const chartHeight = chartConfig.height - chartConfig.margin.top - chartConfig.margin.bottom;
+
+  // Calculate scales
+  const maxValue = Math.max(...data.map(d => Math.max(d.submitted, d.notSubmitted)));
+  const yScale = chartHeight / (maxValue * 1.2); // Add 20% padding
+  const xScale = chartWidth / (data.length * 2 + (data.length - 1) * 0.5);
+
+  // Colors
+  const colors = {
+    submitted: 'url(#submittedGradient)',
+    notSubmitted: 'url(#notSubmittedGradient)',
+  };
 
   return (
     <div className="bg-white/60 glass-card rounded-2xl p-6 h-full">
+      {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-lg font-bold text-gray-800 mb-2">
-              Submissions Over Time
+              Form Submission Status by Assigned Users
             </h3>
             <p className="text-gray-600 text-sm">
-              Monthly comparison of forms created vs submissions received
+              Track submission rates across different forms
             </p>
           </div>
           <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-xl flex items-center justify-center">
@@ -32,6 +70,7 @@ const StatisticsChart = () => {
         </div>
       </div>
 
+      {/* Content */}
       {loading ? (
         <div className="flex justify-center items-center h-32">
           <div className="relative">
@@ -62,69 +101,173 @@ const StatisticsChart = () => {
       ) : (
         <div className="space-y-6">
           {/* Legend */}
-          <div className="flex items-center justify-center space-x-8 text-sm">
-            <div className="flex items-center">
-              <div className="w-4 h-4 bg-gradient-to-r from-blue-400 to-cyan-400 rounded mr-3"></div>
-              <span className="text-gray-600 font-medium">Forms Created</span>
+          <div className="flex justify-center space-x-8">
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 rounded" style={{ background: 'linear-gradient(135deg, #feb47b, #ff7e5f)' }}></div>
+              <span className="text-sm font-medium text-gray-700">Submitted</span>
             </div>
-            <div className="flex items-center">
-              <div className="w-4 h-4 bg-gradient-to-r from-purple-400 to-pink-400 rounded mr-3"></div>
-              <span className="text-gray-600 font-medium">Submissions</span>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 rounded" style={{ background: 'linear-gradient(135deg, #606c88, #3f4c6b)' }}></div>
+              <span className="text-sm font-medium text-gray-700">Not Submitted</span>
             </div>
           </div>
 
           {/* Chart */}
-          <div className="relative h-64">
-            <div className="flex items-end justify-between h-full space-x-2">
-              {data.map((item, index) => (
-                <div key={index} className="flex-1 flex flex-col items-center space-y-2 group">
-                  {/* Submissions Bar */}
-                  <div className="w-full flex justify-center">
-                    <div
-                      className="w-3/4 bg-gradient-to-t from-purple-400 to-pink-400 rounded-t-lg transition-all duration-300 group-hover:shadow-md group-hover:shadow-purple-500/20"
-                      style={{
-                        height: `${(item.submissions / maxValue) * 200}px`
-                      }}
-                    ></div>
-                  </div>
-                  
-                  {/* Forms Created Bar */}
-                  <div className="w-full flex justify-center">
-                    <div
-                      className="w-3/4 bg-gradient-to-t from-blue-400 to-cyan-400 rounded-t-lg transition-all duration-300 group-hover:shadow-md group-hover:shadow-blue-500/20"
-                      style={{
-                        height: `${(item.formsCreated / maxValue) * 200}px`
-                      }}
-                    ></div>
-                  </div>
-                  
-                  {/* Month Label */}
-                  <span className="text-xs text-gray-500 font-medium mt-2 group-hover:text-gray-700 transition-colors duration-300">
-                    {item.month}
-                  </span>
-                </div>
-              ))}
-            </div>
-            
-            {/* Grid lines */}
-            <div className="absolute inset-0 pointer-events-none">
-              {[0, 25, 50, 75, 100].map((percent, index) => (
-                <div
-                  key={index}
-                  className="absolute w-full border-t border-gray-200/30"
-                  style={{ top: `${percent}%` }}
-                ></div>
-              ))}
-            </div>
-          </div>
+          <div className="flex justify-center">
+            <svg
+              width={chartConfig.width}
+              height={chartConfig.height}
+              className="overflow-visible"
+            >
+              {/* Definitions for gradients */}
+              <defs>
+                <linearGradient id="submittedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#feb47b" />
+                  <stop offset="100%" stopColor="#ff7e5f" />
+                </linearGradient>
+                <linearGradient id="notSubmittedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#606c88" />
+                  <stop offset="100%" stopColor="#3f4c6b" />
+                </linearGradient>
+              </defs>
 
-          {/* Y-axis labels */}
-          <div className="flex justify-between text-xs text-gray-500 px-2">
-            <span>0</span>
-            <span>{Math.round(maxValue * 0.25)}</span>
-            <span>{Math.round(maxValue * 0.5)}</span>
-            <span>{Math.round(maxValue * 0.75)}</span>
-            <span>{maxValue}</span>
+              {/* Chart area */}
+              <g transform={`translate(${chartConfig.margin.left}, ${chartConfig.margin.top})`}>
+                
+                {/* Y-axis */}
+                <line
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2={chartHeight}
+                  stroke="#E5E7EB"
+                  strokeWidth="2"
+                />
+                
+                {/* Y-axis ticks and labels */}
+                {Array.from({ length: Math.ceil(maxValue / 5) + 1 }, (_, i) => {
+                  const value = i * 5;
+                  const y = chartHeight - (value * yScale);
+                  return (
+                    <g key={i}>
+                      <line
+                        x1="-5"
+                        y1={y}
+                        x2="0"
+                        y2={y}
+                        stroke="#E5E7EB"
+                        strokeWidth="1"
+                      />
+                      <text
+                        x="-10"
+                        y={y + 4}
+                        textAnchor="end"
+                        className="text-xs fill-gray-600"
+                      >
+                        {value}
+                      </text>
+                    </g>
+                  );
+                })}
+
+                {/* Y-axis label */}
+                <text
+                  x="-30"
+                  y={chartHeight / 2}
+                  textAnchor="middle"
+                  transform={`rotate(-90, -30, ${chartHeight / 2})`}
+                  className="text-sm font-medium fill-gray-700"
+                >
+                  Number of Users
+                </text>
+
+                {/* X-axis */}
+                <line
+                  x1="0"
+                  y1={chartHeight}
+                  x2={chartWidth}
+                  y2={chartHeight}
+                  stroke="#E5E7EB"
+                  strokeWidth="2"
+                />
+
+                {/* Bars */}
+                {data.map((item, index) => {
+                  const groupX = index * (chartConfig.barWidth * 2 + chartConfig.groupGap);
+                  const submittedHeight = item.submitted * yScale;
+                  const notSubmittedHeight = item.notSubmitted * yScale;
+                  
+                  return (
+                    <g key={index}>
+                      {/* Submitted bar */}
+                      <rect
+                        x={groupX}
+                        y={chartHeight - submittedHeight}
+                        width={chartConfig.barWidth}
+                        height={submittedHeight}
+                        fill={colors.submitted}
+                        rx="4"
+                        ry="4"
+                        className="transition-all duration-300 hover:opacity-80"
+                      />
+                      
+                      {/* Submitted value label */}
+                      <text
+                        x={groupX + chartConfig.barWidth / 2}
+                        y={chartHeight - submittedHeight - 8}
+                        textAnchor="middle"
+                        className="text-xs font-semibold fill-gray-800"
+                      >
+                        {item.submitted}
+                      </text>
+
+                      {/* Not Submitted bar */}
+                      <rect
+                        x={groupX + chartConfig.barWidth + chartConfig.barGap}
+                        y={chartHeight - notSubmittedHeight}
+                        width={chartConfig.barWidth}
+                        height={notSubmittedHeight}
+                        fill={colors.notSubmitted}
+                        rx="4"
+                        ry="4"
+                        className="transition-all duration-300 hover:opacity-80"
+                      />
+                      
+                      {/* Not Submitted value label */}
+                      <text
+                        x={groupX + chartConfig.barWidth + chartConfig.barGap + chartConfig.barWidth / 2}
+                        y={chartHeight - notSubmittedHeight - 8}
+                        textAnchor="middle"
+                        className="text-xs font-semibold fill-gray-800"
+                      >
+                        {item.notSubmitted}
+                      </text>
+
+                      {/* X-axis label */}
+                      <text
+                        x={groupX + chartConfig.barWidth + chartConfig.barGap / 2}
+                        y={chartHeight + 20}
+                        textAnchor="middle"
+                        transform={`rotate(-15, ${groupX + chartConfig.barWidth + chartConfig.barGap / 2}, ${chartHeight + 20})`}
+                        className="text-xs font-medium fill-gray-700"
+                      >
+                        {item.formName}
+                      </text>
+                    </g>
+                  );
+                })}
+
+                {/* X-axis label */}
+                <text
+                  x={chartWidth / 2}
+                  y={chartHeight + 50}
+                  textAnchor="middle"
+                  className="text-sm font-medium fill-gray-700"
+                >
+                  Forms
+                </text>
+              </g>
+            </svg>
           </div>
         </div>
       )}
