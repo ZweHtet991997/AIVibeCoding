@@ -581,6 +581,46 @@ export const userFormsAPI = {
     }
   },
 
+  // Fetch form details for filling
+  async getFormDetails(userId, formId) {
+    try {
+      const token = getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch(`${apiConfig.baseUrl}/api/v1/user/form-details`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          userId: userId,
+          formId: formId
+        })
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Unauthorized access. Please log in again.');
+        } else if (response.status === 403) {
+          throw new Error('Access denied. User privileges required.');
+        } else if (response.status === 404) {
+          throw new Error('Form not found or not assigned to you.');
+        } else {
+          throw new Error(`Failed to fetch form details: ${response.status}`);
+        }
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching form details:', error);
+      throw error;
+    }
+  },
+
   // Fetch a specific form by ID for filling
   async getFormById(formId) {
     try {
