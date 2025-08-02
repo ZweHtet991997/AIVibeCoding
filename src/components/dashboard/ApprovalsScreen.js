@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { approvalsAPI } from '../../utils/api';
+import ErrorModal from '../common/ErrorModal';
 
 // Heroicons (outline)
 const EyeIcon = (
@@ -35,6 +36,7 @@ const ApprovalsScreen = () => {
   const [scrollPosition, setScrollPosition] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [notification, setNotification] = useState({ show: false, type: '', message: '', title: '' });
   const tableRef = useRef(null);
 
   // Load form responses from API
@@ -98,23 +100,44 @@ const ApprovalsScreen = () => {
 
   // Approve/Reject action
   const handleAction = async (status) => {
+    if (!selectedSubmission) {
+      setNotification({
+        show: true,
+        type: 'error',
+        title: 'Action Failed',
+        message: 'No submission selected for action.'
+      });
+      return;
+    }
+
     setActionLoading(true);
     try {
-      // Simulate API call delay
-      setTimeout(() => {
-        // Update the submission in the list
-        setSubmissions((prev) =>
-          prev.map((sub) =>
-            sub.id === selectedSubmission.id
-              ? { ...sub, status, comment: actionComment }
-              : sub
-          )
-        );
-        setModalOpen(false);
-        setActionLoading(false);
-      }, 1000);
+      // Call the API to approve/reject the form response
+      await approvalsAPI.approveRejectForm(selectedSubmission.id, status, actionComment.trim());
+      
+      // Show success message
+      setNotification({
+        show: true,
+        type: 'success',
+        title: `${status} Successfully`,
+        message: `The form response has been ${status.toLowerCase()} successfully.`
+      });
+      
+      setModalOpen(false);
+      setActionComment(''); // Clear the comment field
+      
+      // Refresh the data to get the latest status from the server
+      await loadFormResponses();
     } catch (error) {
       console.error('Action error:', error);
+      // Show error message
+      setNotification({
+        show: true,
+        type: 'error',
+        title: `${status} Failed`,
+        message: error.message || `Failed to ${status.toLowerCase()} the form response.`
+      });
+    } finally {
       setActionLoading(false);
     }
   };
@@ -149,7 +172,9 @@ const ApprovalsScreen = () => {
         {loading ? (
           <div className="flex justify-center items-center h-32">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-            <span className="ml-4 text-primary-600 font-medium">Loading approvals...</span>
+            <span className="ml-4 text-primary-600 font-medium">
+              {actionLoading ? 'Processing action...' : 'Loading approvals...'}
+            </span>
           </div>
         ) : error ? (
           <div className="text-center py-8">
@@ -302,6 +327,14 @@ const ApprovalsScreen = () => {
           </div>
         </div>
       )}
+
+      {/* Notification Modal */}
+      <ErrorModal
+        open={notification.show}
+        onClose={() => setNotification({ show: false, type: '', message: '', title: '' })}
+        error={notification.message}
+        title={notification.title}
+      />
     </div>
   );
 };

@@ -425,6 +425,60 @@ export const approvalsAPI = {
       console.error('Error fetching form responses:', error);
       throw error;
     }
+  },
+
+  // Approve or reject a form response
+  async approveRejectForm(responseId, status, comment = '') {
+    try {
+      const token = getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      // Validate input parameters
+      if (!responseId) {
+        throw new Error('Response ID is required');
+      }
+      
+      if (!status || !['Approved', 'Rejected'].includes(status)) {
+        throw new Error('Status must be either "Approved" or "Rejected"');
+      }
+
+      const response = await fetch(`${apiConfig.baseUrl}/api/v1/form/approve-reject`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          responseId,
+          status,
+          comment: comment || ''
+        })
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Unauthorized access. Please log in again.');
+        } else if (response.status === 403) {
+          throw new Error('Access denied. Admin privileges required.');
+        } else if (response.status === 404) {
+          throw new Error('Form response not found.');
+        } else if (response.status === 400) {
+          throw new Error('Invalid request data. Please check your input.');
+        } else if (response.status === 409) {
+          throw new Error('This form response has already been processed.');
+        } else {
+          throw new Error(`Failed to ${status.toLowerCase()} form response: ${response.status}`);
+        }
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error(`Error ${status.toLowerCase()}ing form response:`, error);
+      throw error;
+    }
   }
 };
 
