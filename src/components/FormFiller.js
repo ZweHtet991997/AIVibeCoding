@@ -1,42 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { userFormsAPI } from '../utils/api';
 
 const FormFiller = () => {
   const { formId } = useParams();
   const navigate = useNavigate();
-  const [form, setForm] = useState(null);
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetchForm();
-  }, [formId]);
-
-  const fetchForm = async () => {
-    try {
-      setLoading(true);
-      const formData = await userFormsAPI.getFormById(formId);
-      setForm(formData);
-      
-      // Initialize form data with empty values
-      const initialData = {};
-      if (formData.fields) {
-        formData.fields.forEach(field => {
-          initialData[field.id] = '';
-        });
-      }
-      setFormData(initialData);
-    } catch (err) {
-      setError(err.message);
-      console.error('Error fetching form:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleInputChange = (fieldId, value) => {
     setFormData(prev => ({
@@ -53,309 +22,73 @@ const FormFiller = () => {
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!form?.fields) return newErrors;
-
-    form.fields.forEach(field => {
-      const value = formData[field.id];
-      
-      // Required field validation
-      if (field.required && (!value || value.trim() === '')) {
-        newErrors[field.id] = `${field.label} is required`;
-      }
-      
-      // Field-specific validation
-      if (value && value.trim() !== '') {
-        switch (field.type) {
-          case 'email':
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(value)) {
-              newErrors[field.id] = 'Please enter a valid email address';
-            }
-            break;
-          case 'number':
-            if (field.min !== undefined && Number(value) < field.min) {
-              newErrors[field.id] = `Value must be at least ${field.min}`;
-            }
-            if (field.max !== undefined && Number(value) > field.max) {
-              newErrors[field.id] = `Value must be at most ${field.max}`;
-            }
-            break;
-          case 'date':
-            if (field.minDate && new Date(value) < new Date(field.minDate)) {
-              newErrors[field.id] = `Date must be after ${new Date(field.minDate).toLocaleDateString()}`;
-            }
-            if (field.maxDate && new Date(value) > new Date(field.maxDate)) {
-              newErrors[field.id] = `Date must be before ${new Date(field.maxDate).toLocaleDateString()}`;
-            }
-            break;
-        }
-      }
-    });
-
-    return newErrors;
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    
-    const validationErrors = validateForm();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
-
-    try {
-      setSubmitting(true);
-      await userFormsAPI.submitFormResponse(formId, formData);
-      
-      // Show success message and redirect
-      alert('Form submitted successfully!');
-      navigate('/user-home');
-    } catch (err) {
-      setError(err.message);
-      console.error('Error submitting form:', err);
-    } finally {
-      setSubmitting(false);
-    }
+    // Form submission logic would go here
+    console.log('Form submitted:', formData);
+    navigate('/user-home');
   };
 
-  const renderField = (field) => {
-    const fieldError = errors[field.id];
-    const value = formData[field.id] || '';
-
-    const commonProps = {
-      id: field.id,
-      value: value,
-      onChange: (e) => handleInputChange(field.id, e.target.value),
-      className: `w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-        fieldError ? 'border-red-500' : 'border-gray-300'
-      }`,
-      placeholder: field.placeholder || `Enter ${field.label.toLowerCase()}`,
-      required: field.required
-    };
-
-    switch (field.type) {
-      case 'text':
-        return <input type="text" {...commonProps} />;
-      
-      case 'email':
-        return <input type="email" {...commonProps} />;
-      
-      case 'number':
-        return (
-          <input 
-            type="number" 
-            {...commonProps}
-            min={field.min}
-            max={field.max}
-            step={field.step || 1}
-          />
-        );
-      
-      case 'textarea':
-        return (
-          <textarea 
-            {...commonProps}
-            rows={field.rows || 4}
-            className={`${commonProps.className} resize-vertical`}
-          />
-        );
-      
-      case 'select':
-        return (
-          <select {...commonProps}>
-            <option value="">Select an option</option>
-            {field.options?.map((option, index) => (
-                              <option key={index} value={option.value || option}>
-                  {option.value || option}
-                </option>
-            ))}
-          </select>
-        );
-      
-      case 'radio':
-        return (
-          <div className="space-y-2">
-            {field.options?.map((option, index) => (
-              <label key={index} className="flex items-center">
-                <input
-                  type="radio"
-                  name={field.id}
-                  value={option.value || option}
-                  checked={value === (option.value || option)}
-                  onChange={(e) => handleInputChange(field.id, e.target.value)}
-                  className="mr-2"
-                  required={field.required}
-                />
-                <span>{option.value || option}</span>
-              </label>
-            ))}
-          </div>
-        );
-      
-      case 'checkbox':
-        return (
-          <div className="space-y-2">
-            {field.options?.map((option, index) => (
-              <label key={index} className="flex items-center">
-                <input
-                  type="checkbox"
-                  value={option.value || option}
-                  checked={Array.isArray(value) ? value.includes(option.value || option) : false}
-                  onChange={(e) => {
-                    const currentValues = Array.isArray(value) ? value : [];
-                    const newValues = e.target.checked
-                      ? [...currentValues, option.value || option]
-                      : currentValues.filter(v => v !== (option.value || option));
-                    handleInputChange(field.id, newValues);
-                  }}
-                  className="mr-2"
-                />
-                <span>{option.value || option}</span>
-              </label>
-            ))}
-          </div>
-        );
-      
-      case 'date':
-        return (
-          <input 
-            type="date" 
-            id={field.id}
-            value={value || ''}
-            onChange={(e) => handleInputChange(field.id, e.target.value)}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              fieldError ? 'border-red-500' : 'border-gray-300'
-            }`}
-            placeholder="Select date"
-            min={field.minDate}
-            max={field.maxDate}
-            required={field.required}
-          />
-        );
-      
-      case 'file':
-        return (
-          <input 
-            type="file" 
-            {...commonProps}
-            accept={field.accept}
-            multiple={field.multiple}
-            onChange={(e) => {
-              const files = Array.from(e.target.files);
-              handleInputChange(field.id, files);
-            }}
-          />
-        );
-      
-      default:
-        return <input type="text" {...commonProps} />;
-    }
+  const handleBack = () => {
+    navigate('/user-home');
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading form...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full mx-4">
-          <div className="text-center">
-            <div className="text-red-500 text-6xl mb-4">⚠️</div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">Error Loading Form</h2>
-            <p className="text-gray-600 mb-6">{error}</p>
-            <button
-              onClick={() => navigate('/user-home')}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
-            >
-              Back to Dashboard
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!form) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600">Form not found</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-2xl mx-auto px-4">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          {/* Form Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h1 className="text-3xl font-bold text-gray-900">{form.name}</h1>
-              <button
-                onClick={() => navigate('/user-home')}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
-              </button>
-            </div>
-            {form.description && (
-              <p className="text-gray-600 text-lg">{form.description}</p>
-            )}
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
+      {/* Compact Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-16 left-16 w-20 h-20 bg-gradient-to-br from-blue-400/15 to-purple-400/15 rounded-full blur-2xl animate-gentle-float"></div>
+        <div className="absolute top-32 right-24 w-16 h-16 bg-gradient-to-br from-cyan-400/15 to-blue-400/15 rounded-full blur-xl animate-gentle-float" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute bottom-24 left-1/3 w-24 h-24 bg-gradient-to-br from-indigo-400/10 to-purple-400/10 rounded-full blur-2xl animate-gentle-float" style={{ animationDelay: '4s' }}></div>
+      </div>
 
-          {/* Form Fields */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {form.fields?.map((field, index) => (
-              <div key={field.id || index} className="space-y-2">
-                <label htmlFor={field.id} className="block text-sm font-medium text-gray-700">
-                  {field.label}
-                  {field.required && <span className="text-red-500 ml-1">*</span>}
-                </label>
-                
-                {renderField(field)}
-                
-                {errors[field.id] && (
-                  <p className="text-red-500 text-sm">{errors[field.id]}</p>
-                )}
-                
-                {field.helpText && (
-                  <p className="text-gray-500 text-sm">{field.helpText}</p>
-                )}
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Header Section */}
+        <div className="mb-6 animate-fade-in">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleBack}
+                className="p-2 bg-white/80 backdrop-blur-sm border border-slate-200/50 rounded-xl font-medium text-slate-700 hover:bg-white hover:shadow-md transition-all duration-300"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-800 via-blue-800 to-indigo-800 bg-clip-text text-transparent">
+                  Form Not Available
+                </h1>
+                <p className="text-slate-600 text-sm">
+                  Form ID: {formId}
+                </p>
               </div>
-            ))}
-
-            {/* Submit Button */}
-            <div className="pt-6 border-t border-gray-200">
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-3 px-6 rounded-lg transition-colors"
-              >
-                {submitting ? (
-                  <span className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Submitting...
-                  </span>
-                ) : (
-                  'Submit Form'
-                )}
-              </button>
             </div>
-          </form>
+          </div>
+        </div>
+
+        {/* Content Section */}
+        <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          <div className="text-center py-12">
+            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-slate-200 to-slate-300 rounded-full flex items-center justify-center animate-gentle-float">
+              <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-slate-700 mb-2">Form Not Found</h3>
+            <p className="text-slate-500 text-sm max-w-sm mx-auto mb-6">
+              The form you're looking for is not available or has not been assigned to you.
+            </p>
+            <button
+              onClick={handleBack}
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-6 py-3 rounded-xl font-medium shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-2 mx-auto"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Forms
+            </button>
+          </div>
         </div>
       </div>
     </div>

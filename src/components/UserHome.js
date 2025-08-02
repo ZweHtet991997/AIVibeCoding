@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { logout, getUserName } from '../utils/auth';
+import { logout, getUserName, getUserId } from '../utils/auth';
 import { userFormsAPI } from '../utils/api';
 
 const UserHome = () => {
@@ -9,8 +9,8 @@ const UserHome = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  
+  const [statusFilter, setStatusFilter] = useState('All');
+
   useEffect(() => {
     fetchAssignedForms();
   }, []);
@@ -18,15 +18,30 @@ const UserHome = () => {
   const fetchAssignedForms = async () => {
     try {
       setLoading(true);
-      const forms = await userFormsAPI.getAssignedForms();
+      setError(null);
+      const userId = getUserId();
+      const forms = await userFormsAPI.getAssignedForms(userId);
       setAssignedForms(forms);
     } catch (err) {
-      setError('Failed to load assigned forms');
       console.error('Error fetching assigned forms:', err);
+      setError(err.message || 'Failed to fetch assigned forms');
     } finally {
       setLoading(false);
     }
   };
+
+  // Filter forms based on search term and status filter
+  const filteredForms = assignedForms.filter((form) => {
+    // Defensive programming: ensure form has required properties
+    if (!form || typeof form !== 'object') return false;
+    
+    const formName = form.formName || '';
+    const submissionStatus = form.submissionStatus || '';
+    
+    const matchesSearch = formName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'All' || submissionStatus === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   const handleLogout = () => {
     logout();
@@ -37,12 +52,69 @@ const UserHome = () => {
     navigate(`/fill-form/${formId}`);
   };
 
-  // Filter forms based on search term and status
-  const filteredForms = assignedForms.filter(form => {
-    const matchesSearch = form.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = !statusFilter || form.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  // Check if form is fillable (only Pending status)
+  const isFormFillable = (status) => {
+    return status === 'Pending';
+  };
+
+  // Format date to a readable format
+  const formatDate = (dateString) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return 'Invalid Date';
+    }
+  };
+
+  // Get status badge styling
+  const getStatusBadge = (status) => {
+    const statusStyles = {
+      'Complete': 'bg-green-100 text-green-800 border-green-200',
+      'Pending': 'bg-yellow-100 text-yellow-800 border-yellow-200'
+    };
+    
+    return statusStyles[status] || 'bg-gray-100 text-gray-800 border-gray-200';
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+          <p className="text-slate-600">Loading your assigned forms...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-semibold text-slate-700 mb-2">Error Loading Forms</h3>
+          <p className="text-slate-500 text-sm mb-4">{error}</p>
+          <button
+            onClick={fetchAssignedForms}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
@@ -85,189 +157,120 @@ const UserHome = () => {
           </div>
         </div>
 
-        {/* Compact Filter Section */}
-        <div className="mb-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-          <div className="backdrop-blur-sm border border-white/50 rounded-2xl p-4">
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-              <div className="flex flex-col sm:flex-row gap-3 flex-1">
-                {/* Compact Search Input */}
-                <div className="relative flex-1">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg className="h-4 w-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search forms..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="glass-card w-full pl-10 pr-4 py-2.5 bg-white/70 border border-slate-200/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 placeholder-slate-400 text-sm"
-                  />
-                </div>
-                
-                {/* Compact Status Filter */}
-                <div className="relative">
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="glass-card appearance-none w-full sm:w-40 px-3 py-2.5 bg-white/70 border border-slate-200/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-slate-700 text-sm"
-                  >
-                    <option value="">All Statuses</option>
-                    <option value="pending">Pending</option>
-                    <option value="completed">Completed</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                    <svg className="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Compact Results Counter */}
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100/50">
-                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
-                <span className="text-xs font-medium text-slate-700">
-                  <span className="text-blue-600 font-bold">{filteredForms.length}</span> of {assignedForms.length}
-                </span>
+        {/* Filter/Search Section */}
+        {assignedForms.length > 0 && (
+          <div className="flex flex-col mb-6 md:flex-row md:items-center bg-white/60 p-4 rounded-lg shadow justify-between gap-4">
+            <div className="flex flex-col md:flex-row gap-4 flex-1">
+              <input
+                type="text"
+                placeholder="Search by form name..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="w-full md:w-64 px-4 py-2 bg-transparent border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+              <select
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+                className="w-full md:w-1/4 px-4 py-2 bg-transparent border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="All">All Statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="Complete">Complete</option>
+              </select>
+            </div>
+            <div className="flex-shrink-0">
+              <div className="text-sm text-gray-600">
+                Showing {filteredForms.length} of {assignedForms.length} forms
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Compact Content Section */}
         <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          {loading ? (
-            <div className="flex justify-center items-center h-48">
-              <div className="text-center space-y-4">
-                <div className="relative">
-                  <div className="w-12 h-12 mx-auto">
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full animate-pulse-slow"></div>
-                    <div className="absolute inset-1.5 bg-white rounded-full animate-spin"></div>
-                  </div>
-                </div>
-                <p className="text-slate-600 font-medium text-sm">Loading your forms...</p>
-              </div>
-            </div>
-          ) : error ? (
-            <div className="bg-gradient-to-br from-red-50 to-rose-50 border border-red-200/50 rounded-2xl p-6 text-center shadow-soft">
-              <div className="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-red-400 to-rose-500 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Forms</h3>
-              <p className="text-red-600 mb-4 text-sm">{error}</p>
-              <button
-                onClick={fetchAssignedForms}
-                className="bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white px-4 py-2 rounded-xl font-medium shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-2 mx-auto text-sm"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Try Again
-              </button>
-            </div>
-          ) : assignedForms.length === 0 ? (
+          {assignedForms.length === 0 ? (
             <div className="text-center py-12">
               <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-slate-200 to-slate-300 rounded-full flex items-center justify-center animate-gentle-float">
                 <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-slate-700 mb-2">No Forms Assigned</h3>
+              <h3 className="text-xl font-semibold text-slate-700 mb-2">No Forms Available</h3>
               <p className="text-slate-500 text-sm max-w-sm mx-auto">
-                You don't have any forms assigned to you at the moment.
+                Forms will appear here when they are assigned to you.
               </p>
             </div>
           ) : filteredForms.length === 0 ? (
             <div className="text-center py-12">
-              <div className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-slate-200 to-slate-300 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-slate-200 to-slate-300 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-slate-700 mb-2">No Forms Found</h3>
-              <p className="text-slate-500 text-sm">
-                No forms match your current filters.
+              <h3 className="text-xl font-semibold text-slate-700 mb-2">No Forms Found</h3>
+              <p className="text-slate-500 text-sm max-w-sm mx-auto">
+                No forms match your current search and filter criteria.
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
-              <div className="grid gap-4">
-                {filteredForms.map((form, index) => (
-                  <div 
-                    key={form.id} 
-                    className="group bg-white/70 backdrop-blur-sm border border-white/50 rounded-2xl p-5 shadow-soft hover:shadow-card-hover transition-all duration-300 animate-scale-in"
-                    style={{ animationDelay: `${index * 0.05}s` }}
-                  >
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        {/* Compact Form Icon */}
-                        <div className="p-2 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl group-hover:scale-105 transition-transform duration-300 flex-shrink-0">
-                          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                        </div>
-                        
-                        {/* Compact Form Info */}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-lg font-semibold text-slate-800 mb-1 group-hover:text-blue-600 transition-colors duration-300 truncate">
-                            {form.name}
-                          </h3>
-                          {form.description && (
-                            <p className="text-slate-600 text-sm mb-2 line-clamp-2">{form.description}</p>
-                          )}
-                          
-                          {/* Compact Form Details */}
-                          <div className="flex items-center gap-4 text-xs text-slate-500">
-                            <div className="flex items-center gap-1">
-                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                              </svg>
-                              <span>{form.fields?.length || 0} fields</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                              </svg>
-                              <span>{new Date(form.assignedAt).toLocaleDateString()}</span>
-                            </div>
-                          </div>
-                        </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {filteredForms
+                .filter(form => form && form.formId) // Filter out invalid forms before mapping
+                .map((form, index) => {
+                  const formName = form.formName || 'Unnamed Form';
+                  const description = form.description || 'No description available';
+                  const submissionStatus = form.submissionStatus || 'Unknown';
+                  const assignedDate = form.assignedDate || new Date().toISOString();
+                  
+                  const fillable = isFormFillable(submissionStatus);
+                  return (
+                    <div
+                      key={`${form.formId}-${index}`} // Use combination of formId and index for unique keys
+                      className={`group backdrop-blur-sm border border-white/50 rounded-2xl p-6 transition-all duration-300 ${
+                        fillable 
+                          ? 'bg-white/70 hover:bg-white/90 hover:shadow-lg cursor-pointer' 
+                          : 'bg-white/50 cursor-not-allowed opacity-75 cursor-default'
+                      }`}
+                      onClick={() => fillable && handleFillForm(form.formId)}
+                    >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <h3 className={`font-semibold mb-2 transition-colors ${
+                          fillable 
+                            ? 'text-slate-800 group-hover:text-blue-600' 
+                            : 'text-slate-600'
+                        }`}>
+                          {formName}
+                        </h3>
+                        <p className="text-slate-600 text-sm line-clamp-2 mb-3">
+                          {description}
+                        </p>
                       </div>
-                      
-                      {/* Compact Action Button */}
-                      <div className="flex-shrink-0">
-                        {form.status === 'completed' ? (
-                          <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200/50 rounded-xl">
-                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                            <span className="font-medium text-green-700 text-sm">Done</span>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => handleFillForm(form.id)}
-                            className="group/btn relative px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-xl font-medium shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-2 text-sm overflow-hidden"
-                          >
-                            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -skew-x-12 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-500"></div>
-                            <svg className="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                            <span className="relative z-10">Fill</span>
-                          </button>
-                        )}
+                      <div className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusBadge(submissionStatus)}`}>
+                        {submissionStatus}
                       </div>
                     </div>
+                    
+                    <div className="flex items-center justify-between text-xs text-slate-500">
+                      <span>Assigned: {formatDate(assignedDate)}</span>
+                      {fillable ? (
+                        <div className="flex items-center gap-1 text-blue-600 group-hover:text-blue-700">
+                          <span className="font-medium">Fill Form</span>
+                          <svg className="w-3 h-3 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                      ) : null}
+                    </div>
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
           )}
         </div>
       </div>
     </div>
   );
-  };
-  
-  export default UserHome; 
+};
+
+export default UserHome; 

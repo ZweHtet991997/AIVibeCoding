@@ -46,21 +46,28 @@ const ApprovalsScreen = () => {
     try {
       const response = await approvalsAPI.getFormResponses();
       
-      // Transform API response to match table structure
-      const transformedData = response.map(item => ({
-        id: item.responseId,
-        formName: item.formName,
-        submittedBy: item.userName,
-        submissionDate: item.responseDate,
-        status: item.status,
-        comment: item.comment,
-        data: {
-          [item.fieldKey]: item.responseValue
-        },
-        // Store original API data for reference
-        originalData: item
-      }));
+      console.log('Raw API Response:', response);
       
+      // Transform API response to match table structure
+      const transformedData = response
+        .filter(item => item && item.responseId) // Filter out invalid items
+        .map((item, index) => ({
+          id: item.responseId,
+          formName: item.formName,
+          submittedBy: item.userName,
+          submissionDate: item.responseDate,
+          status: item.status,
+          comment: item.comment,
+          data: {
+            [item.fieldKey]: item.responseValue
+          },
+          // Store original API data for reference
+          originalData: item,
+          // Add unique identifier in case of duplicate responseIds
+          uniqueKey: `${item.responseId}-${index}`
+        }));
+      
+      console.log('Transformed Data:', transformedData);
       setSubmissions(transformedData);
     } catch (error) {
       console.error('Error loading form responses:', error);
@@ -109,6 +116,13 @@ const ApprovalsScreen = () => {
       });
       return;
     }
+
+    console.log('Action Details:', {
+      selectedSubmission: selectedSubmission,
+      status: status,
+      comment: actionComment.trim(),
+      submissionId: selectedSubmission.id
+    });
 
     setActionLoading(true);
     try {
@@ -207,7 +221,7 @@ const ApprovalsScreen = () => {
                 </tr>
               ) : (
                 filteredSubmissions.map((sub) => (
-                  <tr key={sub.id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <tr key={sub.uniqueKey || sub.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-4 px-4 text-dashboard-bodyText font-medium">{sub.id}</td>
                     <td className="py-4 px-4 text-dashboard-bodyText">{sub.formName}</td>
                     <td className="py-4 px-4 text-dashboard-bodyText">{sub.submittedBy}</td>

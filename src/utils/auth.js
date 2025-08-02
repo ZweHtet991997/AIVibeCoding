@@ -48,4 +48,14 @@ export function getUserName() {
   } catch {
     return 'User';
   }
+}
+
+// Get user ID
+export function getUserId() {
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+    return user?.userId || null;
+  } catch {
+    return null;
+  }
 } 

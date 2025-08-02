@@ -440,24 +440,80 @@ export const approvalsAPI = {
         throw new Error('Response ID is required');
       }
       
+      // Ensure responseId is a number
+      const numericResponseId = parseInt(responseId);
+      if (isNaN(numericResponseId)) {
+        throw new Error('Response ID must be a valid number');
+      }
+      
       if (!status || !['Approved', 'Rejected'].includes(status)) {
         throw new Error('Status must be either "Approved" or "Rejected"');
       }
 
-      const response = await fetch(`${apiConfig.baseUrl}/api/v1/form/approve-reject`, {
+      // Prepare request payload - try different formats
+      const requestPayload = {
+        responseId: numericResponseId,
+        status: status,
+        comment: comment || ''
+      };
+
+      // Alternative payload format if the above doesn't work
+      const alternativePayload = {
+        responseId: numericResponseId,
+        status: status,
+        comment: comment || '',
+        // Add any additional fields that might be expected
+        timestamp: new Date().toISOString()
+      };
+
+      console.log('API Request Details:', {
+        url: `${apiConfig.baseUrl}/api/v1/form/approve-reject`,
+        method: 'POST',
+        payload: requestPayload,
+        token: token ? `${token.substring(0, 20)}...` : 'No token'
+      });
+
+      // Try the primary request format
+      let response = await fetch(`${apiConfig.baseUrl}/api/v1/form/approve-reject`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          responseId,
-          status,
-          comment: comment || ''
-        })
+        body: JSON.stringify(requestPayload)
+      });
+
+      // If the first attempt fails with 500, try alternative format
+      if (response.status === 500) {
+        console.log('Primary request failed with 500, trying alternative format...');
+        response = await fetch(`${apiConfig.baseUrl}/api/v1/form/approve-reject`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(alternativePayload)
+        });
+      }
+
+      console.log('API Response Details:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
       });
 
       if (!response.ok) {
+        let errorMessage = `Failed to ${status.toLowerCase()} form response: ${response.status}`;
+        
+        // Try to get detailed error message from response
+        try {
+          const errorData = await response.json();
+          console.log('Error response data:', errorData);
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (parseError) {
+          console.log('Could not parse error response as JSON');
+        }
+
         if (response.status === 401) {
           throw new Error('Unauthorized access. Please log in again.');
         } else if (response.status === 403) {
@@ -465,15 +521,18 @@ export const approvalsAPI = {
         } else if (response.status === 404) {
           throw new Error('Form response not found.');
         } else if (response.status === 400) {
-          throw new Error('Invalid request data. Please check your input.');
+          throw new Error(errorMessage);
         } else if (response.status === 409) {
           throw new Error('This form response has already been processed.');
+        } else if (response.status === 500) {
+          throw new Error(`Server error: ${errorMessage}. Please try again or contact support.`);
         } else {
-          throw new Error(`Failed to ${status.toLowerCase()} form response: ${response.status}`);
+          throw new Error(errorMessage);
         }
       }
 
       const data = await response.json();
+      console.log('API Success Response:', data);
       return data;
     } catch (error) {
       console.error(`Error ${status.toLowerCase()}ing form response:`, error);
@@ -485,21 +544,16 @@ export const approvalsAPI = {
 // API service for user forms operations
 export const userFormsAPI = {
   // Fetch assigned forms for the current user
-  async getAssignedForms() {
+  async getAssignedForms(userId) {
     try {
       const token = getToken();
       if (!token) {
         throw new Error('No authentication token found');
       }
 
-      // For demo purposes, return sample data
-      // TODO: Replace with actual API call when backend is ready
-      const { getAssignedForms } = await import('./sampleFormData');
-      return getAssignedForms();
+      const url = `${apiConfig.baseUrl}/api/v1/user/assigned?userId=${userId}`;
 
-      // Uncomment when backend is ready:
-      /*
-      const response = await fetch(`${apiConfig.baseUrl}/api/v1/user/assigned-forms`, {
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -512,6 +566,8 @@ export const userFormsAPI = {
           throw new Error('Unauthorized access. Please log in again.');
         } else if (response.status === 403) {
           throw new Error('Access denied. User privileges required.');
+        } else if (response.status === 404) {
+          throw new Error('No assigned forms found.');
         } else {
           throw new Error(`Failed to fetch assigned forms: ${response.status}`);
         }
@@ -519,7 +575,6 @@ export const userFormsAPI = {
 
       const data = await response.json();
       return data;
-      */
     } catch (error) {
       console.error('Error fetching assigned forms:', error);
       throw error;
@@ -534,19 +589,6 @@ export const userFormsAPI = {
         throw new Error('No authentication token found');
       }
 
-      // For demo purposes, return sample data
-      // TODO: Replace with actual API call when backend is ready
-      const { getFormById } = await import('./sampleFormData');
-      const form = getFormById(formId);
-      
-      if (!form) {
-        throw new Error('Form not found or not assigned to you.');
-      }
-      
-      return form;
-
-      // Uncomment when backend is ready:
-      /*
       const response = await fetch(`${apiConfig.baseUrl}/api/v1/user/form/${formId}`, {
         method: 'GET',
         headers: {
@@ -569,7 +611,6 @@ export const userFormsAPI = {
 
       const data = await response.json();
       return data;
-      */
     } catch (error) {
       console.error('Error fetching form:', error);
       throw error;
@@ -584,17 +625,6 @@ export const userFormsAPI = {
         throw new Error('No authentication token found');
       }
 
-      // For demo purposes, simulate successful submission
-      // TODO: Replace with actual API call when backend is ready
-      console.log('Form submission data:', { formId, formData });
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      return { success: true, message: 'Form submitted successfully' };
-
-      // Uncomment when backend is ready:
-      /*
       const response = await fetch(`${apiConfig.baseUrl}/api/v1/user/form/${formId}/submit`, {
         method: 'POST',
         headers: {
@@ -619,7 +649,6 @@ export const userFormsAPI = {
 
       const data = await response.json();
       return data;
-      */
     } catch (error) {
       console.error('Error submitting form:', error);
       throw error;
