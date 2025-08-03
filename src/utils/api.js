@@ -466,15 +466,8 @@ export const approvalsAPI = {
         timestamp: new Date().toISOString()
       };
 
-      console.log('API Request Details:', {
-        url: `${apiConfig.baseUrl}/api/v1/form/approve-reject`,
-        method: 'POST',
-        payload: requestPayload,
-        token: token ? `${token.substring(0, 20)}...` : 'No token'
-      });
-
       // Try the primary request format
-      let response = await fetch(`${apiConfig.baseUrl}/api/v1/form/approve-reject`, {
+      let response = await fetch(`${apiConfig.baseUrl}/api/v1/form/approval`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -486,7 +479,7 @@ export const approvalsAPI = {
       // If the first attempt fails with 500, try alternative format
       if (response.status === 500) {
         console.log('Primary request failed with 500, trying alternative format...');
-        response = await fetch(`${apiConfig.baseUrl}/api/v1/form/approve-reject`, {
+        response = await fetch(`${apiConfig.baseUrl}/api/v1/form/approval`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

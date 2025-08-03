@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { approvalsAPI } from '../../utils/api';
 import ErrorModal from '../common/ErrorModal';
 
@@ -9,16 +10,6 @@ const EyeIcon = (
     <circle cx="12" cy="12" r="3" />
   </svg>
 );
-const CheckIcon = (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1 -ml-1">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-  </svg>
-);
-const XIcon = (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1 -ml-1">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-  </svg>
-);
 
 
 
@@ -27,13 +18,9 @@ const XIcon = (
 const statusOptions = ['Pending', 'Approved', 'Rejected'];
 
 const ApprovalsScreen = () => {
+  const navigate = useNavigate();
   const [submissions, setSubmissions] = useState([]);
   const [filters, setFilters] = useState({ formName: '', status: '' });
-  const [selectedSubmission, setSelectedSubmission] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [actionComment, setActionComment] = useState('');
-  const [actionLoading, setActionLoading] = useState(false);
-  const [scrollPosition, setScrollPosition] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [notification, setNotification] = useState({ show: false, type: '', message: '', title: '' });
@@ -82,12 +69,7 @@ const ApprovalsScreen = () => {
     loadFormResponses();
   }, []);
 
-  // Maintain scroll position after modal close
-  useEffect(() => {
-    if (!modalOpen && tableRef.current) {
-      tableRef.current.scrollTop = scrollPosition;
-    }
-  }, [modalOpen, scrollPosition]);
+
 
   // Filter submissions based on form name and status
   const filteredSubmissions = submissions.filter(submission => {
@@ -97,63 +79,9 @@ const ApprovalsScreen = () => {
     return matchesFormName && matchesStatus;
   });
 
-  // Open detail modal
+  // Navigate to submission view
   const handleView = (submission) => {
-    setScrollPosition(tableRef.current ? tableRef.current.scrollTop : 0);
-    setSelectedSubmission(submission);
-    setActionComment('');
-    setModalOpen(true);
-  };
-
-  // Approve/Reject action
-  const handleAction = async (status) => {
-    if (!selectedSubmission) {
-      setNotification({
-        show: true,
-        type: 'error',
-        title: 'Action Failed',
-        message: 'No submission selected for action.'
-      });
-      return;
-    }
-
-    console.log('Action Details:', {
-      selectedSubmission: selectedSubmission,
-      status: status,
-      comment: actionComment.trim(),
-      submissionId: selectedSubmission.id
-    });
-
-    setActionLoading(true);
-    try {
-      // Call the API to approve/reject the form response
-      await approvalsAPI.approveRejectForm(selectedSubmission.id, status, actionComment.trim());
-      
-      // Show success message
-      setNotification({
-        show: true,
-        type: 'success',
-        title: `${status} Successfully`,
-        message: `The form response has been ${status.toLowerCase()} successfully.`
-      });
-      
-      setModalOpen(false);
-      setActionComment(''); // Clear the comment field
-      
-      // Refresh the data to get the latest status from the server
-      await loadFormResponses();
-    } catch (error) {
-      console.error('Action error:', error);
-      // Show error message
-      setNotification({
-        show: true,
-        type: 'error',
-        title: `${status} Failed`,
-        message: error.message || `Failed to ${status.toLowerCase()} the form response.`
-      });
-    } finally {
-      setActionLoading(false);
-    }
+    navigate(`/submission/${submission.id}`);
   };
 
   return (
@@ -187,7 +115,7 @@ const ApprovalsScreen = () => {
           <div className="flex justify-center items-center h-32">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
             <span className="ml-4 text-primary-600 font-medium">
-              {actionLoading ? 'Processing action...' : 'Loading approvals...'}
+              Loading approvals...
             </span>
           </div>
         ) : error ? (
@@ -253,94 +181,6 @@ const ApprovalsScreen = () => {
           </table>
         )}
       </div>
-
-      {/* Detail Modal */}
-      {modalOpen && selectedSubmission && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setModalOpen(false)}>
-          <div className="soft-bg backdrop-blur-md border border-white/20 rounded-2xl shadow-xl w-full max-w-2xl h-[600px] p-8 relative animate-scale-in flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="absolute top-4 right-4 glass-input rounded-lg p-2 text-gray-600 hover:text-gray-800 hover:neon-soft transition-all duration-300"
-              onClick={() => setModalOpen(false)}
-              aria-label="Close"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Submission Details</h2>
-              <p className="text-gray-600">Review and manage submission information</p>
-            </div>
-            <div className="mb-6">
-              <div className="grid grid-cols-3 gap-6">
-                <div>
-                  <div className="text-sm font-medium text-gray-600 mb-1">Form Name</div>
-                  <div className="font-semibold text-gray-800">{selectedSubmission.formName}</div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-600 mb-1">Submitted By</div>
-                  <div className="font-semibold text-gray-800">{selectedSubmission.submittedBy}</div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-600 mb-1">Submission Date</div>
-                  <div className="font-semibold text-gray-800">{new Date(selectedSubmission.submissionDate).toLocaleDateString()}</div>
-                </div>
-              </div>
-            </div>
-            <div className="mb-6 flex-1 overflow-hidden">
-              <div className="text-lg font-semibold text-gray-800 mb-3">Form Data</div>
-              <div className="glass-input backdrop-blur-md border border-white/20 p-4 rounded-xl shadow-lg h-full overflow-y-auto">
-                <div className="mb-3">
-                  <div className="text-sm font-medium text-gray-600 mb-1">{selectedSubmission.originalData?.fieldKey || 'N/A'}</div>
-                  <div className="font-semibold text-gray-800">{selectedSubmission.originalData?.responseValue || 'N/A'}</div>
-                </div>
-              </div>
-            </div>
-            {/* Only show comment and action buttons if status is Pending */}
-            {selectedSubmission.status === 'Pending' ? (
-              <>
-                <div className="mb-6">
-                  <div className="text-lg font-semibold text-gray-800 mb-3">Admin Comment</div>
-                  <textarea
-                    className="w-full glass-input rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
-                    rows={3}
-                    placeholder="Add a comment (optional)"
-                    value={actionComment}
-                    onChange={e => setActionComment(e.target.value)}
-                    disabled={actionLoading}
-                  />
-                </div>
-                <div className="flex gap-2 justify-end">
-                  <button
-                    className="flex items-center gap-1.5 bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-60"
-                    onClick={() => handleAction('Approved')}
-                    disabled={actionLoading}
-                  >
-                    {CheckIcon}
-                    {actionLoading ? 'Approving...' : 'Approve'}
-                  </button>
-                  <button
-                    className="flex items-center gap-1.5 bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-60"
-                    onClick={() => handleAction('Rejected')}
-                    disabled={actionLoading}
-                  >
-                    {XIcon}
-                    {actionLoading ? 'Rejecting...' : 'Reject'}
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div className="mb-6">
-                <div className="text-lg font-semibold text-gray-800 mb-3">Admin Comment</div>
-                <div className="glass-input backdrop-blur-md border border-white/20 p-4 rounded-xl text-sm text-gray-700 min-h-[3rem]">
-                  {selectedSubmission.comment || <span className="text-gray-400">No comment provided</span>}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Notification Modal */}
       <ErrorModal
