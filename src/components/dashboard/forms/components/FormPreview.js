@@ -194,10 +194,19 @@ const FormPreview = ({ form }) => {
         );
       
       case 'file':
+        // File inputs cannot have their value set programmatically
+        const fileInputProps = {
+          id: field.id,
+          className: `w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            fieldError ? 'border-red-500' : 'border-gray-300'
+          }`,
+          required: field.required
+        };
+        
         return (
           <input 
             type="file" 
-            {...commonProps}
+            {...fileInputProps}
             accept={field.accept}
             multiple={field.multiple}
             onChange={(e) => {

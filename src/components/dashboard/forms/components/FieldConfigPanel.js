@@ -193,18 +193,6 @@ const FieldConfigPanel = ({ field, onUpdate, onDelete }) => {
                 Example: .pdf,.doc,.docx,.jpg,.png
               </p>
             </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="multiple"
-                checked={field.multiple || false}
-                onChange={(e) => handleInputChange('multiple', e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="multiple" className="ml-2 block text-sm text-gray-700">
-                Allow multiple files
-              </label>
-            </div>
           </div>
         );
 

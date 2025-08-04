@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getUserId } from '../utils/auth';
 import { userFormsAPI } from '../utils/api';
+import ErrorModal from './common/ErrorModal';
+
+
 
 const FormFiller = () => {
   const { formId } = useParams();
@@ -12,6 +15,9 @@ const FormFiller = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [submissionMessage, setSubmissionMessage] = useState('');
 
   // Fetch form schema from API
   useEffect(() => {
@@ -30,12 +36,14 @@ const FormFiller = () => {
         // Parse the formSchema string to JSON
         if (data.formSchema) {
           const parsedSchema = JSON.parse(data.formSchema);
+          console.log('Parsed form schema:', parsedSchema);
           setFormSchema(parsedSchema);
           
           // Initialize form data with empty values
           const initialData = {};
           if (parsedSchema.fields) {
             parsedSchema.fields.forEach(field => {
+              console.log(`Initializing field: ${field.label}, type: ${field.type}, id: ${field.id}`);
               if (field.type === 'checkbox') {
                 initialData[field.id] = [];
               } else {
@@ -43,7 +51,11 @@ const FormFiller = () => {
               }
             });
           }
+          console.log('Initial form data:', initialData);
           setFormData(initialData);
+          
+          // Clear any existing errors
+          setErrors({});
         } else {
           throw new Error('Invalid form schema received');
         }
@@ -59,6 +71,11 @@ const FormFiller = () => {
   }, [formId]);
 
   const handleInputChange = (fieldId, value) => {
+    console.log('handleInputChange called:', fieldId, value);
+    if (Array.isArray(value) && value.length > 0 && value[0] instanceof File) {
+      console.log('File input detected:', value.map(f => f.name));
+    }
+    
     setFormData(prev => ({
       ...prev,
       [fieldId]: value
@@ -151,34 +168,85 @@ const FormFiller = () => {
     setSubmitting(true);
     
     try {
-      // Prepare form data for submission
-      const submissionData = {
-        formId: parseInt(formId),
-        userId: getUserId(),
-        responses: Object.keys(formData).map(fieldId => {
-          const field = formSchema.fields.find(f => f.id === fieldId);
-          const value = formData[fieldId];
+      const userId = getUserId();
+      
+      // Check if form has file upload fields
+      const hasFileFields = formSchema.fields.some(field => field.type === 'file');
+      console.log('Form has file fields:', hasFileFields);
+      console.log('Form fields:', formSchema.fields.map(f => ({ id: f.id, type: f.type, label: f.label })));
+      
+      // Prepare response data array
+      const responseDataArray = [];
+      let fileToUpload = null;
+      
+      for (const fieldId of Object.keys(formData)) {
+        const field = formSchema.fields.find(f => f.id === fieldId);
+        const value = formData[fieldId];
+        
+        if (field) {
+          let processedValue = value;
           
-          return {
-            fieldId: fieldId,
-            fieldName: field.label,
-            fieldType: field.type,
-            value: field.type === 'file' ? (Array.isArray(value) ? value.map(f => f.name) : []) : value,
-            required: field.required || false
-          };
-        })
-      };
+          // Handle file uploads
+          if ((field.type === 'file' ) && value) {
+            console.log('Processing file field:', field.label, 'Value:', value);
+            if (Array.isArray(value) && value.length > 0) {
+              // For multiple files, use the first one for upload and store all filenames
+              const fileNames = value.map(file => file.name);
+              processedValue = fileNames.join(', ');
+              fileToUpload = value[0]; // Use first file for upload
+              console.log('Multiple files detected, using first file:', fileToUpload.name);
+            } else if (value instanceof File) {
+              processedValue = value.name;
+              fileToUpload = value;
+              console.log('Single file detected:', fileToUpload.name);
+            }
+          }
+          
+          // Handle checkbox arrays
+          if (field.type === 'checkbox' && Array.isArray(value)) {
+            processedValue = value.join(', ');
+          }
+          
+          responseDataArray.push({
+            field: field.label,
+            value: processedValue,
+            type: field.type
+          });
+        }
+      }
+      
+      // Convert response data to JSON string
+      const responseDataString = JSON.stringify(responseDataArray);
+      
+      // Submit to API with conditional file upload
+      console.log('Submitting with file:', fileToUpload ? fileToUpload.name : 'No file');
+      console.log('Has file fields:', hasFileFields);
+      const result = await userFormsAPI.submitFormResponse(
+        parseInt(formId), 
+        userId, 
+        responseDataString, 
+        fileToUpload // Always pass the file if we have one, regardless of hasFileFields
+      );
+      
+      // Show success message
+      setSubmissionMessage('Your form has been submitted successfully.');
+      setShowSuccessModal(true);
 
-      console.log('Form submission data:', submissionData);
-      
-      // For now, just display the data (actual API integration can be added later)
-      alert('Form submitted successfully! Check console for data.');
-      
-      // Navigate back to user home
-      navigate('/user-home');
     } catch (err) {
       console.error('Error submitting form:', err);
-      setError('Failed to submit form. Please try again.');
+      console.error('Error details:', {
+        message: err.message,
+        stack: err.stack,
+        name: err.name
+      });
+      
+      // Check if it's a network error or API error
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        setSubmissionMessage('Network error. Please check your connection and try again.');
+      } else {
+        setSubmissionMessage(`Failed to submit form: ${err.message}`);
+      }
+      setShowErrorModal(true);
     } finally {
       setSubmitting(false);
     }
@@ -190,7 +258,17 @@ const FormFiller = () => {
 
   const renderField = (field) => {
     const fieldError = errors[field.id];
-    const value = formData[field.id] || '';
+    let value = formData[field.id] || '';
+
+    // Debug logging to check field type and value
+    console.log(`Rendering field: ${field.label}, type: ${field.type}, value:`, value);
+
+    // Ensure value is not accidentally treated as file data for non-file fields
+    // But preserve array values for checkbox fields
+    if (field.type !== 'file' && field.type !== 'fileupload' && field.type !== 'checkbox' && Array.isArray(value)) {
+      console.warn(`Field ${field.label} has array value but is not a file/checkbox field. Converting to string.`);
+      value = value.join(', ');
+    }
 
     const commonProps = {
       id: field.id,
@@ -231,6 +309,8 @@ const FormFiller = () => {
         );
       
       case 'select':
+      case 'dropdown':
+        console.log(`Rendering dropdown for field: ${field.label} with options:`, field.options);
         return (
           <select {...commonProps}>
             <option value="">Select an option</option>
@@ -243,6 +323,8 @@ const FormFiller = () => {
         );
       
       case 'radio':
+      case 'radiobutton':
+        console.log(`Rendering radio for field: ${field.label} with options:`, field.options);
         return (
           <div className="space-y-2">
             {field.options?.map((option, index) => (
@@ -304,22 +386,112 @@ const FormFiller = () => {
         );
       
       case 'file':
+      case 'fileupload':
+        console.log(`Rendering file upload for field: ${field.label}`);
         return (
-          <input 
-            type="file" 
-            {...commonProps}
-            accept={field.accept || "image/*,.pdf,.doc,.docx"}
-            multiple={field.multiple}
-            onChange={(e) => {
-              const files = Array.from(e.target.files);
-              handleInputChange(field.id, files);
-            }}
-          />
+          <div className="space-y-2">
+            <input 
+              type="file" 
+              id={field.id}
+              accept={field.accept || "image/*,.pdf,.doc,.docx"}
+              multiple={field.multiple}
+              onChange={(e) => {
+                const files = Array.from(e.target.files);
+                handleInputChange(field.id, files);
+              }}
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                fieldError ? 'border-red-500' : 'border-gray-300'
+              }`}
+              required={field.required}
+            />
+            {value && Array.isArray(value) && value.length > 0 && (
+              <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm font-medium text-blue-800 mb-2">Selected files:</p>
+                <ul className="space-y-1">
+                  {value.map((file, index) => (
+                    <li key={index} className="text-sm text-blue-700 flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         );
       
       default:
+        console.warn(`Unknown field type: ${field.type} for field: ${field.label}`);
         return <input type="text" {...commonProps} />;
     }
+  };
+
+  const getFieldIcon = (type) => {
+    const icons = {
+      text: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+      ),
+      email: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+        </svg>
+      ),
+      number: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+        </svg>
+      ),
+      textarea: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      ),
+      select: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+        </svg>
+      ),
+      dropdown: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+        </svg>
+      ),
+      radio: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+      radiobutton: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+      checkbox: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+      date: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+        </svg>
+      ),
+      file: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+        </svg>
+      ),
+      fileupload: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+        </svg>
+      )
+    };
+    return icons[type] || icons.text;
   };
 
   if (loading) {
@@ -466,19 +638,31 @@ const FormFiller = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               {formSchema.fields?.map((field, index) => (
                 <div key={field.id || index} className="space-y-3">
-                  <label htmlFor={field.id} className="block text-sm font-medium text-gray-700">
-                    {field.label}
-                    {field.required && <span className="text-red-500 ml-1">*</span>}
-                  </label>
+                  <div className="flex items-center gap-3">
+                    <label htmlFor={field.id} className="block text-sm font-medium text-gray-700 flex-1">
+                      {field.label}
+                      {field.required && <span className="text-red-500 ml-1">*</span>}
+                    </label>
+                  </div>
                   
                   {renderField(field)}
                   
                   {errors[field.id] && (
-                    <p className="text-red-500 text-sm">{errors[field.id]}</p>
+                    <p className="text-red-500 text-sm flex items-center gap-1">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {errors[field.id]}
+                    </p>
                   )}
                   
                   {field.helpText && (
-                    <p className="text-gray-500 text-sm">{field.helpText}</p>
+                    <p className="text-gray-500 text-sm flex items-center gap-1">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {field.helpText}
+                    </p>
                   )}
                 </div>
               ))}
@@ -488,20 +672,20 @@ const FormFiller = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="neon-soft w-full py-4 px-6 rounded-xl font-medium text-gray-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="neon-soft w-full py-4 px-6 rounded-xl font-medium text-gray-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
                 >
                   {submitting ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-gray-800 border-t-transparent rounded-full animate-spin mr-2 inline"></div>
-                      Submitting...
-                    </>
+                    <div className="flex items-center justify-center">
+                      <div className="w-5 h-5 border-2 border-gray-800 border-t-transparent rounded-full animate-spin mr-3"></div>
+                      <span>Submitting Form...</span>
+                    </div>
                   ) : (
-                    <>
-                      <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="flex items-center justify-center">
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                       </svg>
-                      Submit Form
-                    </>
+                      <span>Submit Form</span>
+                    </div>
                   )}
                 </button>
               </div>
@@ -509,6 +693,30 @@ const FormFiller = () => {
           </div>
         </div>
       </div>
+
+      {/* Success Modal */}
+      <ErrorModal
+        open={showSuccessModal}
+        onClose={() => {
+          setShowSuccessModal(false);
+          navigate('/user-home');
+        }}
+        error={submissionMessage}
+        title="Form Submitted Successfully!"
+      />
+
+      {/* Error Modal */}
+      <ErrorModal
+        open={showErrorModal}
+        onClose={() => setShowErrorModal(false)}
+        error={submissionMessage}
+        title="Submission Failed"
+        showRetry={true}
+        onRetry={() => {
+          setShowErrorModal(false);
+          handleSubmit({ preventDefault: () => {} });
+        }}
+      />
     </div>
   );
 };

@@ -172,42 +172,6 @@ export const formsAPI = {
     }
   },
 
-  // Get form by ID for editing
-  async getFormById(formId) {
-    try {
-      const token = getToken();
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(`${apiConfig.baseUrl}/api/v1/form/${formId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error('Unauthorized access. Please log in again.');
-        } else if (response.status === 403) {
-          throw new Error('Access denied. Admin privileges required.');
-        } else if (response.status === 404) {
-          throw new Error('Form not found.');
-        } else {
-          throw new Error(`Failed to fetch form: ${response.status}`);
-        }
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error fetching form:', error);
-      throw error;
-    }
-  },
-
   // Fetch form assignments for a specific form
   async getFormAssignments(formId) {
     try {
@@ -651,20 +615,46 @@ export const userFormsAPI = {
   },
 
   // Submit form response
-  async submitFormResponse(formId, formData) {
+  async submitFormResponse(formId, userId, responseData, file = null) {
     try {
       const token = getToken();
       if (!token) {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`${apiConfig.baseUrl}/api/v1/user/form/${formId}/submit`, {
+      // Create FormData for multipart/form-data submission
+      const formData = new FormData();
+      formData.append('userId', userId.toString());
+      formData.append('formId', formId.toString());
+      formData.append('responseData', responseData);
+      
+      // Debug FormData contents
+      console.log('FormData contents:');
+      for (let [key, value] of formData.entries()) {
+        if (value instanceof File) {
+          console.log(`${key}: File(${value.name}, ${value.size} bytes)`);
+        } else {
+          console.log(`${key}: ${value}`);
+        }
+      }
+      
+      // Conditionally append file if provided
+      console.log('API: File parameter received:', file ? file.name : 'No file');
+      if (file) {
+        formData.append('ResponseFile', file);
+        console.log('API: File appended to FormData:', file.name);
+      } else {
+        console.log('API: No file to append');
+      }
+
+      const response = await fetch(`${apiConfig.baseUrl}/api/v1/user/submitresponse`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
+          // Note: Don't set Content-Type header when using FormData
+          // The browser will automatically set it with the boundary
         },
-        body: JSON.stringify(formData)
+        body: formData
       });
 
       if (!response.ok) {
@@ -673,15 +663,35 @@ export const userFormsAPI = {
         } else if (response.status === 403) {
           throw new Error('Access denied. User privileges required.');
         } else if (response.status === 400) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Invalid form data');
+          // Get the response content type to determine how to parse it
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Invalid form data');
+          } else {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Invalid form data');
+          }
         } else {
           throw new Error(`Failed to submit form: ${response.status}`);
         }
       }
 
-      const data = await response.json();
-      return data;
+      // Get the response content type to determine how to parse it
+      const contentType = response.headers.get('content-type');
+      console.log('Response Content-Type:', contentType);
+      
+      if (contentType && contentType.includes('application/json')) {
+        // Parse as JSON
+        const data = await response.json();
+        console.log('API Response (JSON):', data);
+        return data;
+      } else {
+        // Parse as text
+        const textResponse = await response.text();
+        console.log('API Response (Text):', textResponse);
+        return { message: textResponse };
+      }
     } catch (error) {
       console.error('Error submitting form:', error);
       throw error;
