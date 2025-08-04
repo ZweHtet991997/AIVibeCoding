@@ -174,6 +174,16 @@ const FormBuilderScreen = () => {
     try {
       setSaving(true);
       
+      // Validate form name
+      if (!form.name || form.name.trim() === '') {
+        setErrorModal({
+          open: true,
+          error: 'Please enter a Form Name before saving.',
+          title: 'Form Name Required'
+        });
+        return;
+      }
+      
       // Generate formId: formName + currentDateTime(ddmmyyss) + milliseconds for uniqueness
       const now = new Date();
       const day = String(now.getDate()).padStart(2, '0');
@@ -195,7 +205,7 @@ const FormBuilderScreen = () => {
       // Generate form schema with metadata
       const formSchema = {
         id: formId,
-        name: form.name || 'Untitled Form',
+        name: form.name,
         description: form.description || '',
         fields: form.fields || [],
         createdAt: new Date().toISOString(),
@@ -213,7 +223,7 @@ const FormBuilderScreen = () => {
 
       // Prepare request body according to API requirements
       const requestBody = {
-        formName: form.name || 'Untitled Form',
+        formName: form.name,
         formSchema: JSON.stringify(formSchema),
         status: 'Draft',
         formUrl: formUrl

@@ -403,24 +403,6 @@ const SubmissionViewScreen = () => {
                 {submission.status}
             </span>
           </div>
-
-          {/* Submission Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-1">
-            <div className="bg-white/50 glass-card rounded-xl p-4">
-              <div className="text-sm font-medium text-gray-500 mb-1">Submitted By</div>
-              <div className="text-lg font-semibold text-gray-800">{submission.submittedBy}</div>
-              <div className="text-sm text-gray-600">{submission.userEmail}</div>
-            </div>
-            <div className="bg-white/50 glass-card rounded-xl p-4">
-              <div className="text-sm font-medium text-gray-500 mb-1">Submission Date</div>
-              <div className="text-lg font-semibold text-gray-800">
-                {new Date(submission.submissionDate).toLocaleDateString()}
-              </div>
-              <div className="text-sm text-gray-600">
-                {new Date(submission.submissionDate).toLocaleTimeString()}
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Form Data */}
