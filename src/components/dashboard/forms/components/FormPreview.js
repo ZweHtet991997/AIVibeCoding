@@ -74,7 +74,6 @@ const FormPreview = ({ form }) => {
     }
 
     // In preview mode, just show the data
-    console.log('Form data:', formData);
     alert('Form submitted successfully! (Preview mode)');
   };
 

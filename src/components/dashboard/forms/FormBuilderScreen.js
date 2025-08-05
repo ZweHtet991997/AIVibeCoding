@@ -41,7 +41,7 @@ const FormBuilderScreen = () => {
   const loadForm = async () => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call when backend is ready
+      // Generate unique form ID
       // const formData = await formsAPI.getFormById(formId);
       
       // For demo purposes, load sample form
@@ -70,7 +70,11 @@ const FormBuilderScreen = () => {
       
       setForm(sampleForm);
     } catch (error) {
-      console.error('Error loading form:', error);
+      setErrorModal({
+        open: true,
+        error: error.message || 'Failed to load form',
+        title: 'Load Error'
+      });
     } finally {
       setLoading(false);
     }
@@ -135,8 +139,6 @@ const FormBuilderScreen = () => {
   };
 
   const handleUpdateField = (fieldId, updates) => {
-    console.log('Updating field:', fieldId, updates);
-    
     setForm(prev => ({
       ...prev,
       fields: prev.fields.map(field =>
@@ -146,7 +148,6 @@ const FormBuilderScreen = () => {
     
     // Update selectedField if it's the field being updated
     if (selectedField?.id === fieldId) {
-      console.log('Updating selectedField:', { ...selectedField, ...updates });
       setSelectedField(prev => ({ ...prev, ...updates }));
     }
   };
@@ -193,12 +194,7 @@ const FormBuilderScreen = () => {
       const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
       const formNameClean = (form.name || 'UntitledForm').replace(/[^a-zA-Z0-9]/g, '');
       const formId = `${formNameClean}${day}${month}${year}${seconds}${milliseconds}`;
-      
-      console.log('Generated formId:', formId);
-      console.log('Form name:', form.name);
-      console.log('Cleaned form name:', formNameClean);
-      console.log('Current date/time:', `${day}/${month}/${year} ${seconds}s`);
-      
+    
       // Generate formUrl: {{baseFrontendUrl}}/form/fill/{formId}
       const formUrl = `${apiConfig.frontendUrl}/form/fill/${formId}`;
       
@@ -228,16 +224,10 @@ const FormBuilderScreen = () => {
         status: 'Draft',
         formUrl: formUrl
       };
-
-      console.log('Request body being sent:', requestBody);
-      console.log('Form schema length:', requestBody.formSchema.length);
-
+      
       // Call the API to create the form
       const result = await formsAPI.createForm(requestBody);
-      
-      console.log('Form created successfully:', result);
-      console.log('Form URL generated:', formUrl);
-      
+
       // Show success message and wait for user to close
       setErrorModal({
         open: true,

@@ -45,7 +45,6 @@ const SubmissionViewScreen = () => {
       const parsed = JSON.parse(responseDataString);
       return Array.isArray(parsed) ? parsed : [];
     } catch (error) {
-      console.error('Error parsing response data:', error);
       return [];
     }
   };
@@ -78,7 +77,6 @@ const SubmissionViewScreen = () => {
        });
 
     } catch (error) {
-      console.error('Error loading submission data:', error);
       setError(error.message || 'Failed to load submission data');
     } finally {
       setLoading(false);
@@ -145,7 +143,6 @@ const SubmissionViewScreen = () => {
         });
 
       } catch (error) {
-        console.error('Preview error:', error);
         setNotification({
           show: true,
           type: 'error',
@@ -220,7 +217,6 @@ const SubmissionViewScreen = () => {
           message: 'File downloaded successfully.'
         });
       } catch (error) {
-        console.error('Download error:', error);
         setNotification({
           show: true,
           type: 'error',
@@ -256,7 +252,6 @@ const SubmissionViewScreen = () => {
       setActionComment('');
       await loadSubmissionData();
     } catch (error) {
-      console.error('Action error:', error);
       setNotification({
         show: true,
         type: 'error',

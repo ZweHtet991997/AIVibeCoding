@@ -52,7 +52,6 @@ const ApprovalStatusChart = () => {
         setData([]);
       }
     } catch (error) {
-      console.error('Error fetching approval data:', error);
       setError(error.message || 'Failed to load approval data');
       setData([]);
     } finally {

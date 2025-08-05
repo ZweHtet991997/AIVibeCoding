@@ -36,14 +36,12 @@ const FormFiller = () => {
         // Parse the formSchema string to JSON
         if (data.formSchema) {
           const parsedSchema = JSON.parse(data.formSchema);
-          console.log('Parsed form schema:', parsedSchema);
           setFormSchema(parsedSchema);
           
           // Initialize form data with empty values
           const initialData = {};
           if (parsedSchema.fields) {
             parsedSchema.fields.forEach(field => {
-              console.log(`Initializing field: ${field.label}, type: ${field.type}, id: ${field.id}`);
               if (field.type === 'checkbox') {
                 initialData[field.id] = [];
               } else {
@@ -51,7 +49,6 @@ const FormFiller = () => {
               }
             });
           }
-          console.log('Initial form data:', initialData);
           setFormData(initialData);
           
           // Clear any existing errors
@@ -71,10 +68,6 @@ const FormFiller = () => {
   }, [formId]);
 
   const handleInputChange = (fieldId, value) => {
-    console.log('handleInputChange called:', fieldId, value);
-    if (Array.isArray(value) && value.length > 0 && value[0] instanceof File) {
-      console.log('File input detected:', value.map(f => f.name));
-    }
     
     setFormData(prev => ({
       ...prev,
@@ -172,8 +165,6 @@ const FormFiller = () => {
       
       // Check if form has file upload fields
       const hasFileFields = formSchema.fields.some(field => field.type === 'file');
-      console.log('Form has file fields:', hasFileFields);
-      console.log('Form fields:', formSchema.fields.map(f => ({ id: f.id, type: f.type, label: f.label })));
       
       // Prepare response data array
       const responseDataArray = [];
@@ -188,17 +179,14 @@ const FormFiller = () => {
           
           // Handle file uploads
           if ((field.type === 'file' ) && value) {
-            console.log('Processing file field:', field.label, 'Value:', value);
             if (Array.isArray(value) && value.length > 0) {
               // For multiple files, use the first one for upload and store all filenames
               const fileNames = value.map(file => file.name);
               processedValue = fileNames.join(', ');
               fileToUpload = value[0]; // Use first file for upload
-              console.log('Multiple files detected, using first file:', fileToUpload.name);
             } else if (value instanceof File) {
               processedValue = value.name;
               fileToUpload = value;
-              console.log('Single file detected:', fileToUpload.name);
             }
           }
           
@@ -219,8 +207,6 @@ const FormFiller = () => {
       const responseDataString = JSON.stringify(responseDataArray);
       
       // Submit to API with conditional file upload
-      console.log('Submitting with file:', fileToUpload ? fileToUpload.name : 'No file');
-      console.log('Has file fields:', hasFileFields);
       const result = await userFormsAPI.submitFormResponse(
         parseInt(formId), 
         userId, 
@@ -233,12 +219,6 @@ const FormFiller = () => {
       setShowSuccessModal(true);
 
     } catch (err) {
-      console.error('Error submitting form:', err);
-      console.error('Error details:', {
-        message: err.message,
-        stack: err.stack,
-        name: err.name
-      });
       
       // Check if it's a network error or API error
       if (err.name === 'TypeError' && err.message.includes('fetch')) {
@@ -260,13 +240,9 @@ const FormFiller = () => {
     const fieldError = errors[field.id];
     let value = formData[field.id] || '';
 
-    // Debug logging to check field type and value
-    console.log(`Rendering field: ${field.label}, type: ${field.type}, value:`, value);
-
     // Ensure value is not accidentally treated as file data for non-file fields
     // But preserve array values for checkbox fields
     if (field.type !== 'file' && field.type !== 'fileupload' && field.type !== 'checkbox' && Array.isArray(value)) {
-      console.warn(`Field ${field.label} has array value but is not a file/checkbox field. Converting to string.`);
       value = value.join(', ');
     }
 
@@ -310,7 +286,6 @@ const FormFiller = () => {
       
       case 'select':
       case 'dropdown':
-        console.log(`Rendering dropdown for field: ${field.label} with options:`, field.options);
         return (
           <select {...commonProps}>
             <option value="">Select an option</option>
@@ -324,7 +299,6 @@ const FormFiller = () => {
       
       case 'radio':
       case 'radiobutton':
-        console.log(`Rendering radio for field: ${field.label} with options:`, field.options);
         return (
           <div className="space-y-2">
             {field.options?.map((option, index) => (
@@ -387,7 +361,6 @@ const FormFiller = () => {
       
       case 'file':
       case 'fileupload':
-        console.log(`Rendering file upload for field: ${field.label}`);
         return (
           <div className="space-y-2">
             <input 
@@ -423,7 +396,6 @@ const FormFiller = () => {
         );
       
       default:
-        console.warn(`Unknown field type: ${field.type} for field: ${field.label}`);
         return <input type="text" {...commonProps} />;
     }
   };

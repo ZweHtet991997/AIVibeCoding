@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { userAPI } from '../../utils/api';
+import { exportUserListToExcel } from '../../utils/excelExport';
 
 const statusColors = {
   Active: 'bg-green-100 text-green-800',
-  Inactive: 'bg-gray-100 text-gray-600',
+  InActive: 'bg-red-100 text-red-800',
 };
 
 export default function UserListScreen() {
@@ -22,7 +23,6 @@ export default function UserListScreen() {
       setUsers(userData);
     } catch (error) {
       setError(error.message);
-      console.error('Error fetching users:', error);
     } finally {
       setLoading(false);
     }
@@ -41,6 +41,15 @@ export default function UserListScreen() {
     return matchesSearch && matchesStatus;
   });
 
+  // Export filtered users to Excel
+  const exportToExcel = () => {
+    try {
+      exportUserListToExcel(filteredUsers, 'users_export');
+    } catch (error) {
+      alert('Failed to export data. Please try again.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -58,8 +67,17 @@ export default function UserListScreen() {
           >
             <option value="">All Statuses</option>
             <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
+            <option value="InActive">InActive</option>
           </select>
+          <button
+            disabled
+            className="w-full md:w-auto px-6 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed flex items-center justify-center gap-2 font-medium"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export to Excel
+          </button>
         </div>
 
         {/* Table Section with Loading */}
@@ -90,8 +108,17 @@ export default function UserListScreen() {
           >
             <option value="">All Statuses</option>
             <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
+            <option value="InActive">InActive</option>
           </select>
+          <button
+            disabled
+            className="w-full md:w-auto px-6 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed flex items-center justify-center gap-2 font-medium"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export to Excel
+          </button>
         </div>
 
         {/* Table Section with Error */}
@@ -128,8 +155,18 @@ export default function UserListScreen() {
         >
           <option value="">All Statuses</option>
           <option value="Active">Active</option>
-          <option value="Inactive">Inactive</option>
+          <option value="InActive">InActive</option>
         </select>
+        <button
+          onClick={exportToExcel}
+          disabled={filteredUsers.length === 0}
+          className="w-full md:w-auto px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Export to Excel
+        </button>
       </div>
 
       {/* Table Section */}

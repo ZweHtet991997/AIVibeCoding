@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { approvalsAPI } from '../../utils/api';
 import ErrorModal from '../common/ErrorModal';
+import { exportApprovalsToExcel } from '../../utils/excelExport';
 
 // Heroicons (outline)
 const EyeIcon = (
@@ -10,10 +11,6 @@ const EyeIcon = (
     <circle cx="12" cy="12" r="3" />
   </svg>
 );
-
-
-
-
 
 const statusOptions = ['Pending', 'Approved', 'Rejected'];
 
@@ -33,7 +30,7 @@ const ApprovalsScreen = () => {
     try {
       const response = await approvalsAPI.getFormResponses();
       
-      console.log('Raw API Response:', response);
+      
       
       // Transform API response to match table structure
       const transformedData = response
@@ -54,7 +51,6 @@ const ApprovalsScreen = () => {
           uniqueKey: `${item.responseId}-${index}`
         }));
       
-      console.log('Transformed Data:', transformedData);
       setSubmissions(transformedData);
     } catch (error) {
       console.error('Error loading form responses:', error);
@@ -78,6 +74,15 @@ const ApprovalsScreen = () => {
     const matchesStatus = !filters.status || submission.status === filters.status;
     return matchesFormName && matchesStatus;
   });
+
+  // Export filtered approvals to Excel
+  const exportToExcelHandler = () => {
+    try {
+      exportApprovalsToExcel(filteredSubmissions, 'approvals_export');
+    } catch (error) {
+      alert('Failed to export data. Please try again.');
+    }
+  };
 
   // Navigate to submission view
   const handleView = (submission) => {
@@ -105,6 +110,16 @@ const ApprovalsScreen = () => {
             <option key={opt} value={opt}>{opt}</option>
           ))}
         </select>
+        <button
+          onClick={exportToExcelHandler}
+          disabled={filteredSubmissions.length === 0}
+          className="w-full md:w-auto px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Export to Excel
+        </button>
       </div>
 
 

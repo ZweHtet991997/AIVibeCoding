@@ -49,7 +49,6 @@ const FormsScreen = () => {
               totalAssignedUsers: assignments.length
             };
           } catch (error) {
-            console.error(`Error fetching assignments for form ${form.formId}:`, error);
             return {
               ...form,
               totalAssignedUsers: 0
@@ -60,7 +59,6 @@ const FormsScreen = () => {
       
       setForms(formsWithUserCounts);
     } catch (error) {
-      console.error('Error fetching forms:', error);
       setError(error.message || 'Failed to load forms. Please try again.');
     } finally {
       setLoading(false);
@@ -129,7 +127,6 @@ const FormsScreen = () => {
       });
       
     } catch (error) {
-      console.error('Error publishing form:', error);
       setErrorModal({
         open: true,
         error: error.message,

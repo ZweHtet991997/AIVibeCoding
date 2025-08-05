@@ -15,7 +15,6 @@ const StatisticsChart = () => {
         const dashboardData = await dashboardAPI.getDashboardData();
         setData(dashboardData.barChartData || []);
       } catch (err) {
-        console.error('Error fetching statistics data:', err);
         setError(err.message || 'Failed to load statistics data');
       } finally {
         setLoading(false);
@@ -40,7 +39,7 @@ const StatisticsChart = () => {
 
   // Calculate scales
   const maxValue = Math.max(...data.map(d => Math.max(d.submitted, d.notSubmitted)));
-  const yScale = chartHeight / (maxValue * 1.2); // Add 20% padding
+  const yScale = maxValue > 0 ? chartHeight / (maxValue * 1.2) : chartHeight / 10; // Add 20% padding for top spacing
   const xScale = chartWidth / (data.length * 2 + (data.length - 1) * 0.5);
 
   // Colors
@@ -145,29 +144,34 @@ const StatisticsChart = () => {
                 />
                 
                 {/* Y-axis ticks and labels */}
-                {Array.from({ length: Math.ceil(maxValue / 5) + 1 }, (_, i) => {
+                {Array.from({ length: Math.max(1, Math.ceil(maxValue / 5) + 1) }, (_, i) => {
                   const value = i * 5;
-                  const y = chartHeight - (value * yScale);
-                  return (
-                    <g key={i}>
-                      <line
-                        x1="-5"
-                        y1={y}
-                        x2="0"
-                        y2={y}
-                        stroke="#E5E7EB"
-                        strokeWidth="1"
-                      />
-                      <text
-                        x="-10"
-                        y={y + 4}
-                        textAnchor="end"
-                        className="text-xs fill-gray-600"
-                      >
-                        {value}
-                      </text>
-                    </g>
-                  );
+                  // Calculate y position ensuring it stays within chart bounds
+                  const y = Math.max(0, chartHeight - (value * yScale));
+                  // Render ticks that are within reasonable bounds
+                  if (y >= 0 && y <= chartHeight) {
+                    return (
+                      <g key={i}>
+                        <line
+                          x1="-5"
+                          y1={y}
+                          x2="0"
+                          y2={y}
+                          stroke="#E5E7EB"
+                          strokeWidth="1"
+                        />
+                        <text
+                          x="-10"
+                          y={y + 4}
+                          textAnchor="end"
+                          className="text-xs fill-gray-600"
+                        >
+                          {value}
+                        </text>
+                      </g>
+                    );
+                  }
+                  return null;
                 })}
 
                 {/* Y-axis label */}
@@ -194,8 +198,8 @@ const StatisticsChart = () => {
                 {/* Bars */}
                 {data.map((item, index) => {
                   const groupX = index * (chartConfig.barWidth * 2 + chartConfig.groupGap);
-                  const submittedHeight = item.submitted * yScale;
-                  const notSubmittedHeight = item.notSubmitted * yScale;
+                  const submittedHeight = Math.min(item.submitted * yScale, chartHeight);
+                  const notSubmittedHeight = Math.min(item.notSubmitted * yScale, chartHeight);
                   
                   return (
                     <g key={index}>
@@ -214,7 +218,7 @@ const StatisticsChart = () => {
                       {/* Submitted value label */}
                       <text
                         x={groupX + chartConfig.barWidth / 2}
-                        y={chartHeight - submittedHeight - 8}
+                        y={Math.max(chartHeight - submittedHeight - 8, 12)}
                         textAnchor="middle"
                         className="text-xs font-semibold fill-gray-800"
                       >
@@ -236,7 +240,7 @@ const StatisticsChart = () => {
                       {/* Not Submitted value label */}
                       <text
                         x={groupX + chartConfig.barWidth + chartConfig.barGap + chartConfig.barWidth / 2}
-                        y={chartHeight - notSubmittedHeight - 8}
+                        y={Math.max(chartHeight - notSubmittedHeight - 8, 12)}
                         textAnchor="middle"
                         className="text-xs font-semibold fill-gray-800"
                       >

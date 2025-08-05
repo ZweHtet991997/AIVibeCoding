@@ -15,7 +15,6 @@ const RecentSubmissionsTable = () => {
         const dashboardData = await dashboardAPI.getDashboardData();
         setSubmissions(dashboardData.topFormResponses || []);
       } catch (err) {
-        console.error('Error fetching recent submissions:', err);
         setError(err.message || 'Failed to load recent submissions');
       } finally {
         setLoading(false);

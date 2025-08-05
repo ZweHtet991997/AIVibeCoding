@@ -32,7 +32,6 @@ export const dashboardAPI = {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
       throw error;
     }
   }
@@ -69,7 +68,6 @@ export const formsAPI = {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error fetching forms data:', error);
       throw error;
     }
   },
@@ -112,7 +110,6 @@ export const formsAPI = {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error saving form:', error);
       throw error;
     }
   },
@@ -125,8 +122,6 @@ export const formsAPI = {
         throw new Error('No authentication token found');
       }
 
-      console.log('Creating form with data:', formData);
-
       const response = await fetch(`${apiConfig.baseUrl}/api/v1/form/createform`, {
         method: 'POST',
         headers: {
@@ -136,18 +131,14 @@ export const formsAPI = {
         body: JSON.stringify(formData)
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
       if (!response.ok) {
         let errorMessage = `Failed to create form: ${response.status}`;
         
         try {
           const errorData = await response.json();
-          console.log('Error response data:', errorData);
           errorMessage = errorData.message || errorData.error || errorMessage;
         } catch (parseError) {
-          console.log('Could not parse error response as JSON');
+          // Error response could not be parsed as JSON
         }
 
         if (response.status === 401) {
@@ -164,10 +155,8 @@ export const formsAPI = {
       }
 
       const data = await response.json();
-      console.log('Form created successfully:', data);
       return data;
     } catch (error) {
-      console.error('Error creating form:', error);
       throw error;
     }
   },
@@ -201,7 +190,6 @@ export const formsAPI = {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error fetching form assignments:', error);
       throw error;
     }
   },
@@ -239,7 +227,6 @@ export const formsAPI = {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error assigning user to form:', error);
       throw error;
     }
   },
@@ -273,7 +260,6 @@ export const formsAPI = {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error removing user from form:', error);
       throw error;
     }
   },
@@ -312,7 +298,6 @@ export const formsAPI = {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error activating form:', error);
       throw error;
     }
   }
@@ -349,7 +334,6 @@ export const userAPI = {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error fetching user list:', error);
       throw error;
     }
   }
@@ -386,7 +370,6 @@ export const approvalsAPI = {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error fetching form responses:', error);
       throw error;
     }
   },
@@ -414,7 +397,7 @@ export const approvalsAPI = {
         throw new Error('Status must be either "Approved" or "Rejected"');
       }
 
-      // Prepare request payload - try different formats
+      // Prepare request payload
       const requestPayload = {
         responseId: numericResponseId,
         status: status,
@@ -426,7 +409,6 @@ export const approvalsAPI = {
         responseId: numericResponseId,
         status: status,
         comment: comment || '',
-        // Add any additional fields that might be expected
         timestamp: new Date().toISOString()
       };
 
@@ -442,7 +424,6 @@ export const approvalsAPI = {
 
       // If the first attempt fails with 500, try alternative format
       if (response.status === 500) {
-        console.log('Primary request failed with 500, trying alternative format...');
         response = await fetch(`${apiConfig.baseUrl}/api/v1/form/approval`, {
           method: 'POST',
           headers: {
@@ -453,22 +434,15 @@ export const approvalsAPI = {
         });
       }
 
-      console.log('API Response Details:', {
-        status: response.status,
-        statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries())
-      });
-
       if (!response.ok) {
         let errorMessage = `Failed to ${status.toLowerCase()} form response: ${response.status}`;
         
         // Try to get detailed error message from response
         try {
           const errorData = await response.json();
-          console.log('Error response data:', errorData);
           errorMessage = errorData.message || errorData.error || errorMessage;
         } catch (parseError) {
-          console.log('Could not parse error response as JSON');
+          // Error response could not be parsed as JSON
         }
 
         if (response.status === 401) {
@@ -489,10 +463,8 @@ export const approvalsAPI = {
       }
 
       const data = await response.json();
-      console.log('API Success Response:', data);
       return data;
     } catch (error) {
-      console.error(`Error ${status.toLowerCase()}ing form response:`, error);
       throw error;
     }
   }
@@ -533,7 +505,6 @@ export const userFormsAPI = {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error fetching assigned forms:', error);
       throw error;
     }
   },
@@ -573,7 +544,6 @@ export const userFormsAPI = {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error fetching form details:', error);
       throw error;
     }
   },
@@ -609,7 +579,6 @@ export const userFormsAPI = {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error fetching form:', error);
       throw error;
     }
   },
@@ -628,23 +597,9 @@ export const userFormsAPI = {
       formData.append('formId', formId.toString());
       formData.append('responseData', responseData);
       
-      // Debug FormData contents
-      console.log('FormData contents:');
-      for (let [key, value] of formData.entries()) {
-        if (value instanceof File) {
-          console.log(`${key}: File(${value.name}, ${value.size} bytes)`);
-        } else {
-          console.log(`${key}: ${value}`);
-        }
-      }
-      
       // Conditionally append file if provided
-      console.log('API: File parameter received:', file ? file.name : 'No file');
       if (file) {
         formData.append('ResponseFile', file);
-        console.log('API: File appended to FormData:', file.name);
-      } else {
-        console.log('API: No file to append');
       }
 
       const response = await fetch(`${apiConfig.baseUrl}/api/v1/user/submitresponse`, {
@@ -679,21 +634,17 @@ export const userFormsAPI = {
 
       // Get the response content type to determine how to parse it
       const contentType = response.headers.get('content-type');
-      console.log('Response Content-Type:', contentType);
       
       if (contentType && contentType.includes('application/json')) {
         // Parse as JSON
         const data = await response.json();
-        console.log('API Response (JSON):', data);
         return data;
       } else {
         // Parse as text
         const textResponse = await response.text();
-        console.log('API Response (Text):', textResponse);
         return { message: textResponse };
       }
     } catch (error) {
-      console.error('Error submitting form:', error);
       throw error;
     }
   }

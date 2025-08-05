@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import SummaryCards from './dashboard/SummaryCards';
 import StatisticsChart from './dashboard/StatisticsChart';
@@ -33,7 +33,8 @@ const AdminDashboard = () => {
     setIsLoading(false);
   }, [location.state, navigate]);
 
-  const menuItems = [
+  // Memoize menu items to prevent unnecessary re-renders
+  const menuItems = useMemo(() => [
     { 
       name: 'Dashboard', 
       icon: (
@@ -66,12 +67,24 @@ const AdminDashboard = () => {
         </svg>
       )
     },
-  ];
+  ], []);
 
-  const handleLogout = () => {
+  // Memoize handlers to prevent unnecessary re-renders
+  const handleLogout = useCallback(() => {
     logout();
     navigate('/');
-  };
+  }, [navigate]);
+
+  const handleMenuClick = useCallback((menuName) => {
+    setActiveMenu(menuName);
+  }, []);
+
+  const handleSidebarToggle = useCallback(() => {
+    setSidebarOpen(prev => !prev);
+  }, []);
+
+  // Memoize the current user name
+  const currentUserName = useMemo(() => getUserName(), []);
 
   // Show loading state while verifying admin access
   if (isLoading) {
@@ -112,7 +125,7 @@ const AdminDashboard = () => {
             />
             {sidebarOpen && (
               <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
+                onClick={handleSidebarToggle}
                 className="glass-button rounded-lg p-2 text-gray-600 hover:text-gray-800 hover:neon-soft transition-all duration-300"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,7 +137,7 @@ const AdminDashboard = () => {
           {!sidebarOpen && (
             <div className="flex justify-center mt-4">
               <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
+                onClick={handleSidebarToggle}
                 className="glass-button rounded-lg p-2 text-gray-600 hover:text-gray-800 hover:neon-soft transition-all duration-300"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,7 +153,7 @@ const AdminDashboard = () => {
           {menuItems.map((item, index) => (
             <div key={item.name} className="animate-slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
               <button
-                onClick={() => setActiveMenu(item.name)}
+                onClick={() => handleMenuClick(item.name)}
                 className={`w-full flex items-center px-3 py-3 rounded-xl transition-all duration-300 group ${
                   activeMenu === item.name
                     ? 'glass-card text-gray-800 neon-soft'
@@ -187,7 +200,7 @@ const AdminDashboard = () => {
                   {activeMenu}
                 </h1>
                 <p className="text-gray-600 text-lg">
-                  Welcome back, <span className="text-gray-800 font-semibold">{getUserName()}</span>! 
+                  Welcome back, <span className="text-gray-800 font-semibold">{currentUserName}</span>! 
                   Here's what's happening with your forms and submissions.
                 </p>
               </div>
@@ -259,4 +272,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard; 
+export default React.memo(AdminDashboard); 

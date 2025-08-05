@@ -3,30 +3,23 @@ import React, { useState } from 'react';
 const FieldConfigPanel = ({ field, onUpdate, onDelete }) => {
   const [activeTab, setActiveTab] = useState('basic');
 
-  // Add debugging
-  console.log('FieldConfigPanel received field:', field);
-
   const handleInputChange = (key, value) => {
-    console.log('FieldConfigPanel updating:', key, value);
     onUpdate({ [key]: value });
   };
 
   const handleOptionChange = (index, key, value) => {
     const newOptions = [...(field.options || [])];
     newOptions[index] = { ...newOptions[index], [key]: value };
-    console.log('Updating options:', newOptions);
     onUpdate({ options: newOptions });
   };
 
   const addOption = () => {
     const newOptions = [...(field.options || []), { value: '' }];
-    console.log('Adding option:', newOptions);
     onUpdate({ options: newOptions });
   };
 
   const removeOption = (index) => {
     const newOptions = (field.options || []).filter((_, i) => i !== index);
-    console.log('Removing option:', newOptions);
     onUpdate({ options: newOptions });
   };
 

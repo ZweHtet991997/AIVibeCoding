@@ -94,9 +94,6 @@ const AssignUsersModal = ({ open, onClose, form, onSaveSuccess }) => {
       // Get users to unassign (previously assigned but now deselected)
       const usersToUnassign = assignedUsers.filter(userId => !selected.includes(userId));
 
-      console.log('Newly selected users:', newlySelected);
-      console.log('Users to unassign:', usersToUnassign);
-
       // Create promises for both assignment and unassignment operations
       const assignmentPromises = newlySelected.map(userId =>
         formsAPI.assignUserToForm(form.formId, userId)

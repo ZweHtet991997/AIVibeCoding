@@ -23,7 +23,6 @@ const UserHome = () => {
       const forms = await userFormsAPI.getAssignedForms(userId);
       setAssignedForms(forms);
     } catch (err) {
-      console.error('Error fetching assigned forms:', err);
       setError(err.message || 'Failed to fetch assigned forms');
     } finally {
       setLoading(false);

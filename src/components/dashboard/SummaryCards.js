@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { dashboardAPI } from '../../utils/api';
 import { isAdmin } from '../../utils/auth';
 
@@ -13,7 +13,7 @@ const SummaryCards = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -34,16 +34,15 @@ const SummaryCards = () => {
         totalRejected: data.totalRejected || 0
       });
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
       setError(error.message || 'Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [fetchDashboardData]);
 
   // Refresh data when component mounts or user refreshes page
   useEffect(() => {
@@ -57,9 +56,10 @@ const SummaryCards = () => {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [fetchDashboardData]);
 
-  const cards = [
+  // Memoize cards configuration to prevent unnecessary re-renders
+  const cards = useMemo(() => [
     {
       title: 'Total Forms Created',
       value: loading ? '...' : stats.totalFormsCreated.toLocaleString(),
@@ -104,7 +104,7 @@ const SummaryCards = () => {
       gradient: 'from-green-400 to-emerald-400',
       bgGradient: 'from-green-500/10 to-emerald-500/10'
     }
-  ];
+  ], [loading, stats]);
 
   if (error) {
     return (
@@ -170,4 +170,4 @@ const SummaryCards = () => {
   );
 };
 
-export default SummaryCards; 
+export default React.memo(SummaryCards); 
