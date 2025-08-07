@@ -45,10 +45,10 @@ export const chatbotConfig = {
 // Knowledge base configuration
 export const knowledgeBaseConfig = {
   // Source of knowledge base content
-  source: 'embedded', // 'embedded', 'file', or 'api'
+  source: 'file', // 'embedded', 'file', or 'api'
   
   // File path if using file source
-  filePath: '/knowledge-base/admin-dashboard-docs.md',
+  filePath: '/ADMIN_DASHBOARD_CHATBOT_DOCUMENTATION.md',
   
   // API endpoint if using api source
   apiEndpoint: '/api/chatbot/knowledge-base',

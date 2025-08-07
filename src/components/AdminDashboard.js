@@ -157,7 +157,7 @@ const AdminDashboard = () => {
                 className={`w-full flex items-center px-3 py-3 rounded-xl transition-all duration-300 group ${
                   activeMenu === item.name
                     ? 'glass-card text-gray-800 neon-soft'
-                    : 'glass-button text-gray-600 hover:text-gray-800'
+                    : 'hover:neon-soft text-gray-600 hover:text-gray-800'
                 }`}
               >
                 <span className={`${sidebarOpen ? 'mr-4' : 'mx-auto'} transition-all duration-300`}>

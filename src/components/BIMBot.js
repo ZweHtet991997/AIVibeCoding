@@ -90,24 +90,19 @@ const BIMBot = () => {
     setError('');
 
     try {
-      console.log('Sending message to chatbot...');
       // Get conversation context (last 10 messages for context)
       const conversationHistory = chatbotAPI.getConversationContext(messages, 10);
       
       // Send message to OpenRouter API
       const response = await chatbotAPI.sendMessage(input, conversationHistory);
-      
-      console.log('Chatbot response received:', response);
-      
+            
       // Add bot response to messages
       setMessages(prev => [...prev, { 
         sender: 'bot', 
         text: response.text 
       }]);
 
-    } catch (error) {
-      console.error('Chatbot error:', error);
-      
+    } catch (error) {      
       // Handle different types of errors
       const errorInfo = chatbotErrorHandler.handleError(error);
       setError(errorInfo.message);

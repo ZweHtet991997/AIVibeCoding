@@ -2,158 +2,11 @@
 import apiConfig from '../config';
 import { chatbotConfig, knowledgeBaseConfig, sessionConfig } from '../config/chatbot';
 
-// Knowledge base content (this will be loaded from the documentation)
-const KNOWLEDGE_BASE = `
-# Admin Dashboard Support Guide
-
-## Dashboard Overview
-The main dashboard provides a comprehensive view of your form management system with key metrics and statistics.
-
-**Key Features:**
-- **Summary Cards**: Display total forms created, submissions received, pending approvals, and approval statistics
-- **Statistics Charts**: Visual representation of form submission trends and approval status distribution
-- **Recent Submissions Table**: Quick view of the latest form submissions requiring attention
-
-## Forms Management
-The Forms section is where you create, manage, and publish forms for your organization.
-
-**Key Features:**
-- **Form Creation**: Build custom forms using a drag-and-drop interface
-- **Form Publishing**: Activate forms to make them available for users
-- **User Assignment**: Assign specific users to fill out particular forms
-- **Status Management**: Track forms as Draft, Active, or Inactive
-
-## Approvals Management
-The Approvals section handles the review and approval process for submitted forms.
-
-**Key Features:**
-- **Submission Review**: View all submitted forms with their current status
-- **Status Filtering**: Filter submissions by Pending, Approved, or Rejected status
-- **Detailed View**: Access complete submission details for thorough review
-- **Approval Actions**: Approve or reject submissions with comments
-
-## User Management
-The Users section provides oversight of all system users and their form assignments.
-
-**Key Features:**
-- **User Directory**: View all registered users with their roles and status
-- **Assignment Tracking**: See how many forms each user is assigned
-- **Status Monitoring**: Track user activity status (Active/Inactive)
-- **Search and Filter**: Quickly find specific users or filter by status
-
-## How to Use Each Part of the Dashboard
-
-### Dashboard Overview
-1. **Access the Dashboard**: Log in with your admin credentials
-2. **Review Key Metrics**: Check the summary cards for quick insights
-3. **Navigate Recent Submissions**: Click on any submission in the recent submissions table
-
-### Creating and Managing Forms
-1. **Create a New Form**: Navigate to the "Forms" section and click "+ Create New Form"
-2. **Assign Users to Forms**: In the Forms table, click "Assign Users" for your form
-3. **Publish a Form**: Select the form and click the "Publish" button
-
-### Managing Approvals
-1. **Access Submissions**: Navigate to the "Approvals" section
-2. **Filter Submissions**: Use the search box and status dropdown
-3. **Review Submissions**: Click the "View" button next to any submission
-4. **Take Action**: Approve or reject the submission with comments
-
-### Managing Users
-1. **View User Directory**: Navigate to the "Users" section
-2. **Search and Filter Users**: Use the search box to find specific users
-3. **Monitor User Activity**: Check user status and form assignments
-
-## User Roles and Permissions
-
-### Admin Role
-**Full system access with all capabilities:**
-- Access to all dashboard sections
-- Create, edit, and delete forms
-- Assign users to forms
-- Publish and unpublish forms
-- Review and approve/reject all submissions
-- View all user information and statistics
-
-### Normal User Role
-**Limited access focused on form completion:**
-- View assigned forms only
-- Fill out and submit assigned forms
-- View own submission history
-- Receive notifications about form assignments
-
-## Common Error Messages and Solutions
-
-**"Admin privileges required to view dashboard data"**
-- **Cause**: Your account doesn't have admin role permissions
-- **Solution**: Contact your system administrator to verify your role assignment
-
-**"Failed to load forms. Please try again."**
-- **Cause**: Network connectivity issues or server problems
-- **Solution**: Check your internet connection and try refreshing the page
-
-**"Failed to save assignments"**
-- **Cause**: Server communication error or invalid user/form data
-- **Solution**: Verify the form and users exist, then try again
-
-## Frequently Asked Questions
-
-**Q: How do I access the admin dashboard?**
-A: Log in with your admin credentials. The system will automatically redirect you to the admin dashboard if you have admin privileges.
-
-**Q: How do I create a new form?**
-A: Go to the Forms section and click "+ Create New Form". Use the drag-and-drop builder to design your form, then save it as a draft.
-
-**Q: What's the difference between Draft and Active forms?**
-A: Draft forms are still being created and aren't available to users. Active forms are published and can be filled out by assigned users.
-
-**Q: How do I assign users to a form?**
-A: In the Forms table, click "Assign Users" next to the form. Search for users and check the boxes for those who should have access.
-
-**Q: How do I know when there are new submissions to review?**
-A: Check the "Total Pending Approvals" card on the dashboard and the Approvals section for new submissions.
-
-**Q: What should I consider when approving or rejecting a submission?**
-A: Review all form data carefully, check for completeness and accuracy, and ensure it meets your organization's requirements.
-
-**Q: How long should I take to review submissions?**
-A: Aim to review submissions within 24-48 hours to maintain workflow efficiency.
-
-**Q: How do I see which users are assigned to which forms?**
-A: Go to the Users section to see total assignments per user, or check individual forms in the Forms section.
-
-**Q: What does "Inactive" user status mean?**
-A: Inactive users cannot access the system or fill out forms. This status is typically used for users who have left the organization.
-
-## UI Walkthroughs
-
-### Dashboard Layout Overview
-- **Left Sidebar**: Contains navigation menu with Dashboard, Forms, Approvals, and Users sections
-- **Top Header**: Shows current section name and welcome message
-- **Main Content Area**: Displays the selected section's content
-- **Collapsible Sidebar**: Can be minimized to save screen space
-
-### Forms Section Interface
-- **Search Bar**: Filter forms by name
-- **Status Filter**: Dropdown to filter by Draft, Active, or Inactive
-- **Create Button**: Blue "+ Create New Form" button in the top right
-- **Action Buttons**: Assign Users and Publish buttons for each form
-
-### Approvals Section Interface
-- **Search Bar**: Filter by form name
-- **Status Filter**: Dropdown for Pending, Approved, Rejected
-- **Submission Details**: ID, form name, submitter, date, status
-- **View Button**: Access detailed submission information
-
-### Users Section Interface
-- **Search Bar**: Find users by name or email
-- **Status Filter**: Filter by Active or Inactive status
-- **User Information**: Username, email, role, form assignments, status
-- **Status Indicators**: Color-coded status badges
-`;
+// Knowledge base content (will be loaded from external file)
+let KNOWLEDGE_BASE = '';
 
 // System prompt for the chatbot
-const SYSTEM_PROMPT = `You are ${chatbotConfig.ui.botName}, a helpful AI assistant for the Admin Dashboard system. You have access to comprehensive documentation about the system and should use it to provide accurate, helpful answers to user questions.
+const getSystemPrompt = () => `You are ${chatbotConfig.ui.botName}, a helpful AI assistant for the Admin Dashboard system. You have access to comprehensive documentation about the system and should use it to provide accurate, helpful answers to user questions.
 
 Your role is to:
 1. Help users understand how to use the Admin Dashboard effectively
@@ -178,6 +31,17 @@ Remember to maintain context throughout the conversation and provide relevant, h
 
 // Chatbot API service
 export const chatbotAPI = {
+  // Initialize knowledge base
+  async initialize() {
+    try {
+      if (knowledgeBaseConfig.source !== 'embedded') {
+        await this.loadKnowledgeBase();
+      }
+    } catch (error) {
+      console.error('Failed to initialize knowledge base:', error);
+    }
+  },
+
   // Send message to OpenRouter API
   async sendMessage(message, conversationHistory = []) {
     try {
@@ -186,11 +50,16 @@ export const chatbotAPI = {
         throw new Error('API key not configured. Please set your OpenRouter API key.');
       }
 
+      // Ensure knowledge base is loaded
+      if (knowledgeBaseConfig.source !== 'embedded' && !KNOWLEDGE_BASE) {
+        await this.loadKnowledgeBase();
+      }
+
       // Prepare conversation context
       const messages = [
         {
           role: 'system',
-          content: SYSTEM_PROMPT
+          content: getSystemPrompt()
         },
         ...conversationHistory.map(msg => ({
           role: msg.sender === 'user' ? 'user' : 'assistant',
@@ -250,16 +119,24 @@ export const chatbotAPI = {
     }
   },
 
-  // Load knowledge base from external file (optional)
+  // Load knowledge base from external file
   async loadKnowledgeBase() {
     try {
       if (knowledgeBaseConfig.source === 'file') {
         const response = await fetch(knowledgeBaseConfig.filePath);
+        if (!response.ok) {
+          throw new Error(`Failed to load knowledge base file: ${response.status} ${response.statusText}`);
+        }
         const content = await response.text();
+        KNOWLEDGE_BASE = content; // Update the global knowledge base variable
         return content;
       } else if (knowledgeBaseConfig.source === 'api') {
         const response = await fetch(knowledgeBaseConfig.apiEndpoint);
+        if (!response.ok) {
+          throw new Error(`Failed to load knowledge base from API: ${response.status} ${response.statusText}`);
+        }
         const content = await response.text();
+        KNOWLEDGE_BASE = content;
         return content;
       } else {
         // Default to embedded knowledge base
@@ -267,15 +144,21 @@ export const chatbotAPI = {
       }
     } catch (error) {
       console.error('Failed to load knowledge base:', error);
-      return KNOWLEDGE_BASE; // Fallback to embedded version
+      // Return a fallback message if knowledge base loading fails
+      const fallbackContent = '# Admin Dashboard Support Guide\n\nI apologize, but I\'m currently unable to load the complete knowledge base. Please contact your system administrator to check the chatbot configuration.';
+      KNOWLEDGE_BASE = fallbackContent;
+      return fallbackContent;
     }
   },
-
-  // Update knowledge base content
-  updateKnowledgeBase(newContent) {
-    // This could be used to dynamically update the knowledge base
-    // For now, we're using the static embedded version
-    console.log('Knowledge base update requested:', newContent);
+  // Reload knowledge base from file
+  async reloadKnowledgeBase() {
+    try {
+      await this.loadKnowledgeBase();
+      return true;
+    } catch (error) {
+      console.error('Failed to reload knowledge base:', error);
+      return false;
+    }
   },
 
   // Get conversation context for better responses
@@ -454,4 +337,9 @@ if (sessionConfig.autoCleanup && sessionConfig.cleanupInterval > 0) {
   setInterval(() => {
     chatbotSession.cleanupExpiredSessions();
   }, sessionConfig.cleanupInterval);
-} 
+}
+
+// Initialize knowledge base when module is loaded
+chatbotAPI.initialize().catch(error => {
+  console.error('Failed to initialize chatbot knowledge base:', error);
+}); 
