@@ -85,7 +85,17 @@ namespace FormBuilderApi.Controllers
             }
         }
 
-        [HttpPost("approve-reject")]
+        //[HttpPost("approve-reject")]
+        //public async Task<IActionResult> ApproveOrReject([FromBody] FormResponseApprovalRequestDto dto)
+        //{
+        //    if (dto.Status != "Approved" && dto.Status != "Rejected")
+        //        return BadRequest(new { message = "Status must be 'Approved' or 'Rejected'." });
+
+        //    var result = await _formService.ApproveOrRejectAsync(dto);
+        //    return Ok(result);
+        //}
+
+        [HttpPost("approval")]
         public async Task<IActionResult> ApproveOrReject([FromBody] FormResponseApprovalRequestDto dto)
         {
             if (dto.Status != "Approved" && dto.Status != "Rejected")

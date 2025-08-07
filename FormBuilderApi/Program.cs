@@ -49,6 +49,7 @@ builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IFormService, FormService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAesEncryptionService, AesEncryptionService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -79,5 +80,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseStaticFiles();
 
 app.Run();

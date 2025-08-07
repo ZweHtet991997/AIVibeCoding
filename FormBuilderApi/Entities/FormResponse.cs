@@ -15,12 +15,9 @@ namespace FormBuilderApi.Entities
         [Required]
         public int UserId { get; set; }
 
-        [Required]
-        [MaxLength(100)]
-        public string FieldKey { get; set; }
+        public string? ResponseData { get; set; }
+        public string? FilePath { get; set; }
 
-        [Required]
-        public string ResponseValue { get; set; }
         [Required]
         public DateTime ResponseDate { get; set; }
     }

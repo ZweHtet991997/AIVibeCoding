@@ -13,12 +13,14 @@ namespace FormBuilderApi.Services.Admin
         private readonly AppDbContext _context;
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
 
-        public FormService(AppDbContext context, IConfiguration configuration)
+        public FormService(AppDbContext context, IConfiguration configuration, IEmailService emailService)
         {
             _context = context;
             _configuration = configuration;
             _httpClient = new HttpClient();
+            _emailService = emailService;
         }
 
         //Create Form
@@ -38,7 +40,7 @@ namespace FormBuilderApi.Services.Admin
             {
                 FormName = dto.FormName,
                 FormSchema = dto.FormSchema,
-                CreatedDate = DateTime.UtcNow,
+                CreatedDate = DateConvertService.GetCurrentMyanmarDateTime(),
                 Status = "Draft", // default status
                 FormUrl = dto.FormUrl
             };
@@ -134,11 +136,22 @@ namespace FormBuilderApi.Services.Admin
             {
                 FormId = dto.FormId,
                 UserId = dto.UserId,
-                AssignedAt = DateTime.UtcNow
+                AssignedAt = DateConvertService.GetCurrentMyanmarDateTime()
             };
 
             _context.FormAssignment.Add(assignment);
             await _context.SaveChangesAsync();
+
+            // Fetch user and form details for email
+            var user = await _context.UserTable.FirstOrDefaultAsync(u => u.UserId == dto.UserId);
+            var form = await _context.FormTable.FirstOrDefaultAsync(f => f.FormId == dto.FormId);
+
+            if (user != null && form != null)
+            {
+                var formUrl = form.FormUrl ?? $"/forms/{form.FormId}";
+                await _emailService.SendFormAssignedEmailAsync(user.Email, user.UserName, form.FormName, formUrl);
+            }
+
             return assignment;
         }
 
@@ -159,32 +172,39 @@ namespace FormBuilderApi.Services.Admin
         // Approve or Reject Form Response
         public async Task<FormResponseApproval> ApproveOrRejectAsync(FormResponseApprovalRequestDto dto)
         {
-            // Optional: Check if already approved/rejected
-            var existing = await _context.FormResponseApproval
-                .FirstOrDefaultAsync(a => a.ResponseId == dto.ResponseId);
+            try
+            {
+                // Optional: Check if already approved/rejected
+                var existing = await _context.FormResponseApproval
+                    .FirstOrDefaultAsync(a => a.ResponseId == dto.ResponseId);
 
-            if (existing != null)
-            {
-                // Update existing approval
-                existing.Status = dto.Status;
-                existing.Comment = dto.Comment;
-                existing.DecisionDate = DateTime.UtcNow;
-            }
-            else
-            {
-                // Create new approval record
-                existing = new FormResponseApproval
+                if (existing != null)
                 {
-                    ResponseId = dto.ResponseId,
-                    Status = dto.Status,
-                    Comment = dto.Comment,
-                    DecisionDate = DateTime.UtcNow
-                };
-                _context.FormResponseApproval.Add(existing);
-            }
+                    // Update existing approval
+                    existing.Status = dto.Status;
+                    existing.Comment = dto.Comment;
+                    existing.DecisionDate = DateTime.UtcNow;
+                }
+                else
+                {
+                    // Create new approval record
+                    existing = new FormResponseApproval
+                    {
+                        ResponseId = dto.ResponseId,
+                        Status = dto.Status,
+                        Comment = dto.Comment,
+                        DecisionDate = DateConvertService.GetCurrentMyanmarDateTime()
+                    };
+                    _context.FormResponseApproval.Add(existing);
+                }
 
-            await _context.SaveChangesAsync();
-            return existing;
+                await _context.SaveChangesAsync();
+                return existing;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         // Get All Responses with Status
@@ -205,8 +225,9 @@ namespace FormBuilderApi.Services.Admin
                             UserId = user.UserId,
                             UserName = user.UserName,
                             UserEmail = user.Email,
-                            FieldKey = response.FieldKey,
-                            ResponseValue = response.ResponseValue,
+                            Description = form.Description,
+                            ResponseData = response.ResponseData,
+                            FilePath = response.FilePath,
                             ResponseDate = response.ResponseDate,
                             Status = approval != null ? approval.Status : "Pending",
                             Comment = approval != null ? approval.Comment : null,

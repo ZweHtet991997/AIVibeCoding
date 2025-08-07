@@ -10,15 +10,35 @@
         public string Status { get; set; }
     }
 
+    public class SubmitFormResponseDto
+    {
+        public int FormId { get; set; }
+        public int UserId { get; set; }
+        public string ResponseData { get; set; } // JSON string of responses
+    }
+
     public class UserAssignedFormsDto
     {
         public int FormId { get; set; }
         public string FormName { get; set; }
         public string Description { get; set; }
-        public string FormSchema { get; set; }
         public string Url { get; set; }
         public DateTime AssignedDate { get; set; }
         public string SubmissionStatus { get; set; } // "Submitted", "Not Submitted"
+    }
+
+    public class UserAssignedFormDetailsDto
+    {
+        public int FormId { get; set; }
+        public string FormName { get; set; }
+        public string Description { get; set; }
+        public string FormSchema { get; set; }
+    }
+
+    public class UserAssignedFormRequestModel
+    {
+        public int UserId { get; set; }
+        public int FormId { get; set; }
     }
 
     public class UserResponsesSummaryDto

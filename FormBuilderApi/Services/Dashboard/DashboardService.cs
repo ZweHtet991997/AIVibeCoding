@@ -75,7 +75,7 @@ namespace FormBuilderApi.Services.Dashboard
                 var result = new List<BarChartDataDto>();
 
                 // Get all forms
-                var forms = await _context.FormTable.ToListAsync();
+                var forms = await _context.FormTable.Where(f => f.Status == "Active").ToListAsync();
 
                 foreach (var form in forms)
                 {
