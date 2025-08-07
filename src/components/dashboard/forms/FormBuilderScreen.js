@@ -192,7 +192,7 @@ const FormBuilderScreen = () => {
       const year = String(now.getFullYear()).slice(-2);
       const seconds = String(now.getSeconds()).padStart(2, '0');
       const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
-      const formNameClean = (form.name || 'UntitledForm').replace(/[^a-zA-Z0-9]/g, '');
+      const formNameClean = (form.name).replace(/[^a-zA-Z0-9]/g, '');
       const formId = `${formNameClean}${day}${month}${year}${seconds}${milliseconds}`;
     
       // Generate formUrl: {{baseFrontendUrl}}/form/fill/{formId}
