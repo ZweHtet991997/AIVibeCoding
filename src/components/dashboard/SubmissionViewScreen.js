@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { approvalsAPI } from '../../utils/api';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { approvalsAPI, spamSubmissionsAPI } from '../../utils/api';
 import apiConfig from '../../config';
 import { getToken } from '../../utils/auth';
 import ErrorModal from '../common/ErrorModal';
@@ -27,16 +27,18 @@ const ArrowLeftIcon = (
 const SubmissionViewScreen = () => {
   const { submissionId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   
   const [submission, setSubmission] = useState(null);
   const [parsedResponseData, setParsedResponseData] = useState([]);
   const [actionComment, setActionComment] = useState('');
-     const [actionLoading, setActionLoading] = useState(false);
-   const [loading, setLoading] = useState(true);
-   const [error, setError] = useState('');
-   const [notification, setNotification] = useState({ show: false, type: '', message: '', title: '' });
-   const [previewFile, setPreviewFile] = useState(null);
-   const [previewLoading, setPreviewLoading] = useState(false);
+      const [actionLoading, setActionLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [notification, setNotification] = useState({ show: false, type: '', message: '', title: '' });
+    const [previewFile, setPreviewFile] = useState(null);
+    const [previewLoading, setPreviewLoading] = useState(false);
+    const [isFromSpamScreen, setIsFromSpamScreen] = useState(false);
 
   // Parse response data from JSON string
   const parseResponseData = (responseDataString) => {
@@ -49,13 +51,29 @@ const SubmissionViewScreen = () => {
     }
   };
 
-  // Load submission data
+    // Load submission data
   const loadSubmissionData = async () => {
     setLoading(true);
     setError('');
     try {
-      const responses = await approvalsAPI.getFormResponses();
-      const targetSubmission = responses.find(resp => resp.responseId.toString() === submissionId);
+      // First try to find the submission in non-spam submissions
+      let responses = await approvalsAPI.getFormResponses();
+      let targetSubmission = responses.find(resp => resp.responseId.toString() === submissionId);
+      
+      // If not found in non-spam, try spam submissions
+      if (!targetSubmission) {
+        try {
+          responses = await spamSubmissionsAPI.getSpamFormResponses();
+          targetSubmission = responses.find(resp => resp.responseId.toString() === submissionId);
+          // If found in spam submissions, mark as from spam screen
+          if (targetSubmission) {
+            setIsFromSpamScreen(true);
+          }
+        } catch (spamError) {
+          console.error('Error fetching spam submissions:', spamError);
+          // Continue with the original error if spam fetch fails
+        }
+      }
       
       if (!targetSubmission) {
         throw new Error('Submission not found');
@@ -65,16 +83,16 @@ const SubmissionViewScreen = () => {
       setParsedResponseData(parsedData);
 
              setSubmission({
-         id: targetSubmission.responseId,
-         formName: targetSubmission.formName,
-         submittedBy: targetSubmission.userName,
-         userEmail: targetSubmission.userEmail,
-         submissionDate: targetSubmission.responseDate,
-         status: targetSubmission.status,
-         comment: targetSubmission.comment,
-         decisionDate: targetSubmission.decisionDate,
-         filePath: targetSubmission.filePath
-       });
+          id: targetSubmission.responseId,
+          formName: targetSubmission.formName,
+          submittedBy: targetSubmission.userName,
+          userEmail: targetSubmission.userEmail,
+          submissionDate: targetSubmission.responseDate,
+          status: targetSubmission.status,
+          comment: targetSubmission.comment,
+          decisionDate: targetSubmission.decisionDate,
+          filePath: targetSubmission.filePath
+        });
 
     } catch (error) {
       setError(error.message || 'Failed to load submission data');
@@ -361,7 +379,9 @@ const SubmissionViewScreen = () => {
       <div className="text-center py-8">
         <div className="text-gray-600 mb-4">{error || 'Submission not found'}</div>
         <button
-          onClick={() => navigate('/admin-dashboard', { state: { activeMenu: 'Approvals' }})}
+          onClick={() => navigate('/admin-dashboard', { 
+            state: { activeMenu: isFromSpamScreen ? 'Spam Submissions' : 'Approvals' }
+          })}
           className="text-sm text-blue-600 hover:text-blue-500 font-medium"
         >
           Back
@@ -376,10 +396,12 @@ const SubmissionViewScreen = () => {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
-            <button
-              onClick={() => navigate('/admin-dashboard', { state: { activeMenu: 'Approvals' }})}
-              className="glass-input hover:neon-soft px-3 py-2 rounded-xl flex items-center text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 group"
-            >
+                         <button
+               onClick={() => navigate('/admin-dashboard', { 
+                 state: { activeMenu: isFromSpamScreen ? 'Spam Submissions' : 'Approvals' }
+               })}
+               className="glass-input hover:neon-soft px-3 py-2 rounded-xl flex items-center text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 group"
+             >
               <div className="rounded-full group-hover:bg-gray-100 transition-colors duration-200">
                 {ArrowLeftIcon}
               </div>

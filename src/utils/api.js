@@ -349,7 +349,7 @@ export const approvalsAPI = {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`${apiConfig.baseUrl}/api/v1/form/formresponse`, {
+      const response = await fetch(`${apiConfig.baseUrl}/api/v1/form/formresponse?isSpam=false`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -459,6 +459,42 @@ export const approvalsAPI = {
           throw new Error(`Server error: ${errorMessage}. Please try again or contact support.`);
         } else {
           throw new Error(errorMessage);
+        }
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+
+// API service for spam submissions operations
+export const spamSubmissionsAPI = {
+  // Fetch spam form responses
+  async getSpamFormResponses() {
+    try {
+      const token = getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch(`${apiConfig.baseUrl}/api/v1/form/formresponse?isSpam=true`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Unauthorized access. Please log in again.');
+        } else if (response.status === 403) {
+          throw new Error('Access denied. Admin privileges required.');
+        } else {
+          throw new Error(`Failed to fetch spam form responses: ${response.status}`);
         }
       }
 
@@ -584,7 +620,7 @@ export const userFormsAPI = {
   },
 
   // Submit form response
-  async submitFormResponse(formId, userId, responseData, file = null) {
+  async submitFormResponse(formId, userId, responseData, file = null, isSpam = false) {
     try {
       const token = getToken();
       if (!token) {
@@ -596,6 +632,7 @@ export const userFormsAPI = {
       formData.append('userId', userId.toString());
       formData.append('formId', formId.toString());
       formData.append('responseData', responseData);
+      formData.append('IsSpam', isSpam.toString());
       
       // Conditionally append file if provided
       if (file) {

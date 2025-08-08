@@ -6,6 +6,7 @@ import ApprovalStatusChart from './dashboard/ApprovalStatusChart';
 import RecentSubmissionsTable from './dashboard/RecentSubmissionsTable';
 import FormsScreen from './dashboard/FormsScreen';
 import ApprovalsScreen from './dashboard/ApprovalsScreen';
+import SpamSubmissionsScreen from './dashboard/SpamSubmissionsScreen';
 import UserListScreen from './dashboard/UserListScreen';
 import { logout, getUserName, isAdmin } from '../utils/auth';
 
@@ -56,6 +57,14 @@ const AdminDashboard = () => {
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      )
+    },
+    { 
+      name: 'Spam Submissions', 
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
         </svg>
       )
     },
@@ -247,6 +256,13 @@ const AdminDashboard = () => {
               </div>
             )}
 
+            {/* Spam Submissions Screen Content */}
+            {activeMenu === 'Spam Submissions' && (
+              <div className="animate-fade-in">
+                <SpamSubmissionsScreen />
+              </div>
+            )}
+
             {/* Users Screen Content */}
             {activeMenu === 'Users' && (
               <div className="animate-fade-in">
@@ -255,7 +271,7 @@ const AdminDashboard = () => {
             )}
 
             {/* Other Menu Content */}
-            {activeMenu !== 'Dashboard' && activeMenu !== 'Forms' && activeMenu !== 'Approvals' && activeMenu !== 'Users' && (
+            {activeMenu !== 'Dashboard' && activeMenu !== 'Forms' && activeMenu !== 'Approvals' && activeMenu !== 'Spam Submissions' && activeMenu !== 'Users' && (
               <div className="glass-card rounded-2xl p-8 animate-fade-in">
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">
                   {activeMenu} Management

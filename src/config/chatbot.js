@@ -5,7 +5,8 @@ export const chatbotConfig = {
     apiKey: process.env.REACT_APP_OPENROUTER_API_KEY,
     baseUrl: 'https://openrouter.ai/api/v1',
     //model: 'anthropic/claude-3.5-sonnet',
-    model: 'tngtech/deepseek-r1t2-chimera:free', // Free model with good Burmese support
+    //model: 'tngtech/deepseek-r1t2-chimera:free', 
+    model: 'deepseek/deepseek-chat-v3-0324:free',  // Free model with good Burmese support
     maxTokens: 1000,
     temperature: 0.7,
     stream: false

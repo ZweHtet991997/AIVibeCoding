@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getUserId } from '../utils/auth';
 import { userFormsAPI } from '../utils/api';
+import { spamDetector } from '../utils/spamDetection';
 import ErrorModal from './common/ErrorModal';
 
 
@@ -206,12 +207,18 @@ const FormFiller = () => {
       // Convert response data to JSON string
       const responseDataString = JSON.stringify(responseDataArray);
       
-      // Submit to API with conditional file upload
+      // Perform AI-based spam detection
+      console.log('Performing spam detection...');
+      const isSpam = await spamDetector.detectSpam(responseDataArray);
+      console.log('Spam detection result:', isSpam);
+      
+      // Submit to API with conditional file upload and spam detection result
       const result = await userFormsAPI.submitFormResponse(
         parseInt(formId), 
         userId, 
         responseDataString, 
-        fileToUpload // Always pass the file if we have one, regardless of hasFileFields
+        fileToUpload, // Always pass the file if we have one, regardless of hasFileFields
+        isSpam // Pass the spam detection result
       );
       
       // Show success message
