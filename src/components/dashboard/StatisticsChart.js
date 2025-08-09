@@ -102,7 +102,7 @@ const StatisticsChart = () => {
           {/* Legend */}
           <div className="flex justify-center space-x-8">
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 rounded" style={{ background: 'linear-gradient(135deg, #feb47b, #ff7e5f)' }}></div>
+              <div className="w-4 h-4 rounded" style={{ background: 'linear-gradient(135deg, #654ea3, #eaafc8)' }}></div>
               <span className="text-sm font-medium text-gray-700">Submitted</span>
             </div>
             <div className="flex items-center space-x-2">

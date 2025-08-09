@@ -380,7 +380,7 @@ const SubmissionViewScreen = () => {
         <div className="text-gray-600 mb-4">{error || 'Submission not found'}</div>
         <button
           onClick={() => navigate('/admin-dashboard', { 
-            state: { activeMenu: isFromSpamScreen ? 'Spam Submissions' : 'Approvals' }
+            state: { activeMenu: isFromSpamScreen ? 'Spam Submissions' : 'Submissions' }
           })}
           className="text-sm text-blue-600 hover:text-blue-500 font-medium"
         >
@@ -397,9 +397,9 @@ const SubmissionViewScreen = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
                          <button
-               onClick={() => navigate('/admin-dashboard', { 
-                 state: { activeMenu: isFromSpamScreen ? 'Spam Submissions' : 'Approvals' }
-               })}
+             onClick={() => navigate('/admin-dashboard', { 
+               state: { activeMenu: isFromSpamScreen ? 'Spam Submissions' : 'Submissions' }
+             })}
                className="glass-input hover:neon-soft px-3 py-2 rounded-xl flex items-center text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 group"
              >
               <div className="rounded-full group-hover:bg-gray-100 transition-colors duration-200">

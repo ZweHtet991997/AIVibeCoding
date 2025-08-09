@@ -67,14 +67,14 @@ export const exportUserListToExcel = (users, filename = 'users_export') => {
  * @param {Array} approvals - Array of approval objects
  * @param {string} filename - Name of the file (without extension)
  */
-export const exportApprovalsToExcel = (approvals, filename = 'approvals_export') => {
+export const exportSubmissionsToExcel = (submissions, filename = 'submissions_export') => {
   // Prepare data for export - only include visible columns in the same order
-  const exportData = approvals.map(approval => ({
-    'Submission ID': approval.id,
-    'Form Name': approval.formName,
-    'Submitted By': approval.submittedBy,
-    'Submission Date': new Date(approval.submissionDate).toLocaleDateString(),
-    'Status': approval.status
+  const exportData = submissions.map(submission => ({
+    'Submission ID': submission.id,
+    'Form Name': submission.formName,
+    'Submitted By': submission.submittedBy,
+    'Submission Date': new Date(submission.submissionDate).toLocaleDateString(),
+    'Status': submission.status
   }));
 
   // Set column widths for better formatting
@@ -86,7 +86,7 @@ export const exportApprovalsToExcel = (approvals, filename = 'approvals_export')
     { wch: 12 }  // Status
   ];
 
-  return exportToExcel(exportData, filename, columnWidths, 'Approvals');
+  return exportToExcel(exportData, filename, columnWidths, 'Submissions');
 };
 
 /**

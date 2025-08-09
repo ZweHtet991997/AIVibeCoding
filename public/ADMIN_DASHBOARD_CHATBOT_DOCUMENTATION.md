@@ -25,8 +25,8 @@ The Forms section is where you create, manage, and publish forms for your organi
 - **User Assignment**: Assign specific users to fill out particular forms
 - **Status Management**: Track forms as Draft, Active, or Inactive
 
-### Approvals Management
-The Approvals section handles the review and approval process for submitted forms.
+### Submissions Management
+The Submissions section handles the review and approval process for submitted forms.
 
 **Key Features:**
 - **Submission Review**: View all submitted forms with their current status
@@ -77,7 +77,8 @@ The Users section provides oversight of all system users and their form assignme
    - Click the "+ Create New Form" button
    - Use the drag-and-drop form builder interface
    - Add fields, configure validation, and set form properties
-   - Save your form as a draft
+   - Save your form
+   - The form will be saved as Draft.
 
 2. **Publish a Form**
    - Select the form you want to publish from the Forms table
@@ -92,12 +93,12 @@ The Users section provides oversight of all system users and their form assignme
    - Check the boxes next to users who should fill out the form
    - Click "Save Changes" to confirm assignments
 
-### Managing Approvals
+### Managing Submissions
 
 **Step-by-step guide:**
 
 1. **Access Submissions**
-   - Navigate to the "Approvals" section
+   - Navigate to the "Submissions" section
    - View all submitted forms in the table
 
 2. **Filter Submissions**
@@ -164,7 +165,8 @@ The Users section provides oversight of all system users and their form assignme
 
 **Accessible Features:**
 - Complete dashboard overview
-- Forms management (create, edit, publish)
+- Forms management (create, publish)
+- Currently, forms cannot be edited in both 'Active' and 'Draft' stage. This feature will be added in a future update.
 - User assignment functionality
 - Approval workflow management
 - User directory and management
@@ -228,10 +230,10 @@ A: In the Forms table, click "Assign Users" next to the form. Search for users a
 **Q: What happens when I publish a form?**
 A: Publishing makes the form available to assigned users. They'll be notified and can start filling out the form immediately.
 
-### Approval Process Questions
+### Submissions Review Questions
 
 **Q: How do I know when there are new submissions to review?**
-A: Check the "Total Pending Approvals" card on the dashboard and the Approvals section for new submissions.
+A: Check the "Total Pending Approvals" card on the dashboard and the Submissions section for new submissions.
 
 **Q: What should I consider when approving or rejecting a submission?**
 A: Review all form data carefully, check for completeness and accuracy, and ensure it meets your organization's requirements.
@@ -297,7 +299,7 @@ A: Check their submission history and current assignments in the Users section.
 5. Contact support if the issue persists
 
 **If forms aren't appearing:**
-1. Check if you're in the correct section (Forms vs. Approvals)
+1. Check if you're in the correct section (Forms vs. Submissions)
 2. Verify your search and filter settings
 3. Refresh the page to reload data
 4. Check if the forms were properly saved
@@ -308,7 +310,7 @@ A: Check their submission history and current assignments in the Users section.
 3. Ensure you have proper permissions
 4. Try assigning users one at a time
 
-**If approvals aren't processing:**
+**If submission decisions aren't processing:**
 1. Check your internet connection
 2. Verify the submission data is complete
 3. Try refreshing the page before making decisions
@@ -321,7 +323,7 @@ A: Check their submission history and current assignments in the Users section.
 ### Dashboard Layout Overview
 
 **Main Navigation Structure:**
-- **Left Sidebar**: Contains navigation menu with Dashboard, Forms, Approvals, and Users sections
+- **Left Sidebar**: Contains navigation menu with Dashboard, Forms, Submissions, and Users sections
 - **Top Header**: Shows current section name and welcome message
 - **Main Content Area**: Displays the selected section's content
 - **Collapsible Sidebar**: Can be minimized to save screen space
@@ -346,15 +348,15 @@ A: Check their submission history and current assignments in the Users section.
 3. **Publish**: Click "Publish" → Confirmation dialog appears
 4. **Monitor**: Track form status and user assignments
 
-### Approvals Section Interface
+### Submissions Section Interface
 
-**Approvals Table Features:**
+**Submissions Table Features:**
 - **Search Bar**: Filter by form name
 - **Status Filter**: Dropdown for Pending, Approved, Rejected
 - **Submission Details**: ID, form name, submitter, date, status
 - **View Button**: Access detailed submission information
 
-**Approval Workflow:**
+**Submission Decision Workflow:**
 1. **Review**: Click "View" to see submission details
 2. **Evaluate**: Review all form data and any comments
 3. **Decide**: Choose Approve or Reject

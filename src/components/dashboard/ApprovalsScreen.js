@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { approvalsAPI } from '../../utils/api';
 import ErrorModal from '../common/ErrorModal';
-import { exportApprovalsToExcel } from '../../utils/excelExport';
+import { exportSubmissionsToExcel } from '../../utils/excelExport';
 
 // Heroicons (outline)
 const EyeIcon = (
@@ -75,10 +75,10 @@ const ApprovalsScreen = () => {
     return matchesFormName && matchesStatus;
   });
 
-  // Export filtered approvals to Excel
+  // Export filtered submissions to Excel
   const exportToExcelHandler = () => {
     try {
-      exportApprovalsToExcel(filteredSubmissions, 'approvals_export');
+      exportSubmissionsToExcel(filteredSubmissions, 'submissions_export');
     } catch (error) {
       alert('Failed to export data. Please try again.');
     }
@@ -130,7 +130,7 @@ const ApprovalsScreen = () => {
           <div className="flex justify-center items-center h-32">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
             <span className="ml-4 text-primary-600 font-medium">
-              Loading approvals...
+              Loading submissions...
             </span>
           </div>
         ) : error ? (

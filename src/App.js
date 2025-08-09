@@ -74,7 +74,7 @@ function App() {
           } />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-        {!hideBot && <BIMBot />}
+        {!hideBot && isAdmin() && <BIMBot />}
       </div>
     );
   }

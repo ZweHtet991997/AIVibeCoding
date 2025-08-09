@@ -13,6 +13,8 @@ const SignIn = () => {
   const [error, setError] = useState('');
   const [validationErrors, setValidationErrors] = useState({});
   const [animationStep, setAnimationStep] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isCapsLockOn, setIsCapsLockOn] = useState(false);
 
   // Animation sequence
   useEffect(() => {
@@ -58,6 +60,11 @@ const SignIn = () => {
         [name]: ''
       }));
     }
+  };
+
+  // Caps Lock detection for password field
+  const handlePasswordKeyUp = (e) => {
+    setIsCapsLockOn(e.getModifierState && e.getModifierState('CapsLock'));
   };
 
   // Validate form
@@ -121,95 +128,130 @@ const SignIn = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Panel - Login Form */}
-      <div className="flex-1 flex items-center justify-center bg-white px-6 sm:px-12 lg:px-16">
+    <div className="min-h-screen w-full soft-bg flex">
+      {/* Left Panel - Login Form (modern glass card) */}
+      <div className="flex-1 flex items-center justify-center px-6 sm:px-12 lg:px-16">
         <div className="w-full max-w-md">
-          {/* Branding */}
-          <div className="flex items-center mb-8">
-            <div className="w-10 h-10 mr-3">
-              <img 
-                src="/assets/images/BIM.png" 
-                alt="BIM Logo" 
-                className="w-full h-full object-contain"
-              />
-            </div>
-            <span className="text-2xl font-serif text-gray-800">GROUP OF COMPANIES</span>
-          </div>
-          
-          {/* Welcome Message */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-semibold text-gray-800 mb-2">
-              Hello, Welcome Back
-            </h1>
-            <p className="text-gray-600">
-              Create, manage, submit, and track forms with streamlined workflow
-            </p>
-          </div>
-          
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Input */}
-            <div>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
-                  validationErrors.email ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Enter your email"
-              />
-              {validationErrors.email && (
-                <p className="text-red-500 text-sm mt-1">{validationErrors.email}</p>
-              )}
-            </div>
-            
-            {/* Password Input */}
-            <div>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
-                  validationErrors.password ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Enter your password"
-              />
-              {validationErrors.password && (
-                <p className="text-red-500 text-sm mt-1">{validationErrors.password}</p>
-              )}
-            </div>
-            
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                {error}
+          {/* Card */}
+          <div className="p-8">
+            {/* Branding */}
+            <div className="flex items-center mb-3">
+              <div className="w-12 h-12 mr-3  flex items-center justify-center">
+                <img
+                  src="/assets/images/BIM.png"
+                  alt="BIM Logo"
+                  className="w-12 h-12 object-contain"
+                />
               </div>
-            )}
-            
-            {/* Sign In Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className={`w-full py-3 px-4 rounded-lg font-medium text-white transition-colors ${
-                isLoading
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-primary-600 hover:bg-primary-700'
-              }`}
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Signing In...
+              <div>
+                <span className="text-2xl font-serif text-black">GROUP OF COMPANIES</span>
+              </div>
+            </div>
+
+            {/* Welcome Message */}
+            <div className="mb-8">
+              <p className="text-gray-600">Manage your forms effortlessly with AI-powered chatbot support and built-in spam detection.</p>
+            </div>
+
+            {/* Login Form */}
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Email Input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <div className={`relative`}> 
+                  <span className="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                    <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor"><path d="M2.94 6.34L10 10.88l7.06-4.54A2 2 0 0015.5 4h-11a2 2 0 00-1.56 2.34z"/><path d="M18 8.12l-8 5.16-8-5.16V14a2 2 0 002 2h12a2 2 0 002-2V8.12z"/></svg>
+                  </span>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className={`w-full pl-4 pr-4 py-3 rounded-xl glass-input border focus:outline-none focus:ring-2 focus:ring-primary-400 ${
+                      validationErrors.email ? 'border-red-400 focus:ring-red-300' : 'border-transparent'
+                    }`}
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                  />
                 </div>
-              ) : (
-                'Sign In'
+                {validationErrors.email && (
+                  <p className="text-red-500 text-sm mt-1">{validationErrors.email}</p>
+                )}
+              </div>
+
+              {/* Password Input */}
+              <div>
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                  {isCapsLockOn && (
+                    <span className="text-xs text-amber-600">Caps Lock is on</span>
+                  )}
+                </div>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                    <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 2a6 6 0 00-6 6v2H3a1 1 0 00-1 1v6a1 1 0 001 1h14a1 1 0 001-1v-6a1 1 0 00-1-1h-1V8a6 6 0 00-6-6zm4 8V8a4 4 0 10-8 0v2h8z" clipRule="evenodd"/></svg>
+                  </span>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    onKeyUp={handlePasswordKeyUp}
+                    className={`w-full pl-4 pr-15 py-3 rounded-xl glass-input border focus:outline-none focus:ring-2 focus:ring-primary-400 ${
+                      validationErrors.password ? 'border-red-400 focus:ring-red-300' : 'border-transparent'
+                    }`}
+                    placeholder="••••••••"
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(prev => !prev)}
+                    className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? (
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C7 20 2.73 16.11 1 12c.64-1.49 1.62-2.86 2.82-4.04M9.9 4.24A10.94 10.94 0 0 1 12 4c5 0 9.27 3.89 11 8-1 2.33-2.67 4.32-4.7 5.71M1 1l22 22"/></svg>
+                    ) : (
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    )}
+                  </button>
+                </div>
+                {validationErrors.password && (
+                  <p className="text-red-500 text-sm mt-1">{validationErrors.password}</p>
+                )}
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
+                  {error}
+                </div>
               )}
-            </button>
-          </form>
+
+              {/* Sign In Button */}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-all shadow-soft ${
+                  isLoading
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 neon-soft'
+                }`}
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
+                    Signing in...
+                  </div>
+                ) : (
+                  'Sign In'
+                )}
+              </button>
+            </form>
+
+            {/* Small footnote */}
+            <p className="text-xs text-gray-600 mt-8">By signing in, you agree to our Terms and Privacy Policy.</p>
+          </div>
         </div>
       </div>
       
@@ -336,7 +378,7 @@ const SignIn = () => {
           </div>
           
           {/* Floating success indicators */}
-          <div className="absolute top-20 -left-4 transform -rotate-12">
+          <div className="absolute top-40 -left-0 transform -rotate-12">
             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center shadow-lg">
               <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
