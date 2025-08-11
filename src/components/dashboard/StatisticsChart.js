@@ -106,7 +106,7 @@ const StatisticsChart = () => {
               <span className="text-sm font-medium text-gray-700">Submitted</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 rounded" style={{ background: 'linear-gradient(135deg, #606c88, #3f4c6b)' }}></div>
+              <div className="w-4 h-4 rounded" style={{ background: 'linear-gradient(135deg, #5D4157, #A8CABA)' }}></div>
               <span className="text-sm font-medium text-gray-700">Not Submitted</span>
             </div>
           </div>
@@ -121,12 +121,12 @@ const StatisticsChart = () => {
               {/* Definitions for gradients */}
               <defs>
                 <linearGradient id="submittedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#feb47b" />
-                  <stop offset="100%" stopColor="#ff7e5f" />
+                  <stop offset="0%" stopColor="#654ea3" />
+                  <stop offset="100%" stopColor="#eaafc8" />
                 </linearGradient>
                 <linearGradient id="notSubmittedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#606c88" />
-                  <stop offset="100%" stopColor="#3f4c6b" />
+                  <stop offset="0%" stopColor="#5D4157" />
+                  <stop offset="100%" stopColor="#A8CABA" />
                 </linearGradient>
               </defs>
 

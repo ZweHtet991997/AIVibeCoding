@@ -131,16 +131,16 @@ const SignIn = () => {
     <div className="min-h-screen w-full soft-bg flex">
       {/* Left Panel - Login Form (modern glass card) */}
       <div className="flex-1 flex items-center justify-center px-6 sm:px-12 lg:px-16">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-xl">
           {/* Card */}
-          <div className="p-8">
+          <div className="p-8 rounded-2xl">
             {/* Branding */}
             <div className="flex items-center mb-3">
-              <div className="w-12 h-12 mr-3  flex items-center justify-center">
+              <div className="w-20 h-20 mr-3  flex items-center justify-center">
                 <img
                   src="/assets/images/BIM.png"
                   alt="BIM Logo"
-                  className="w-12 h-12 object-contain"
+                  className="w-20 h-20 object-contain"
                 />
               </div>
               <div>
@@ -256,7 +256,7 @@ const SignIn = () => {
       </div>
       
       {/* Right Panel - Animated Form Builder */}
-      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
+      <div className="hidden lg:flex flex-1 soft-bg relative overflow-hidden">
         <div className="absolute inset-0 flex items-center justify-center">
           {/* Floating geometric shapes */}
           <div className="absolute top-8 left-8 w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full opacity-20 animate-pulse"></div>
@@ -378,7 +378,7 @@ const SignIn = () => {
           </div>
           
           {/* Floating success indicators */}
-          <div className="absolute top-40 -left-0 transform -rotate-12">
+          <div className="absolute top-60 left-10 transform -rotate-12">
             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center shadow-lg">
               <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -386,7 +386,7 @@ const SignIn = () => {
             </div>
           </div>
           
-          <div className="absolute bottom-20 -right-4 transform rotate-12">
+          <div className="absolute bottom-60 right-5 transform rotate-12">
             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center shadow-lg">
               <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1zM3 16a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />

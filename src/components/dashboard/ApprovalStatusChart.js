@@ -137,6 +137,32 @@ const ApprovalStatusChart = () => {
           {/* Donut Chart */}
           <div className="relative w-32 h-32">
             <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 100 100">
+              <defs>
+                  {/* Approved gradient */}
+                  <linearGradient id="approvedGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#10B981" />
+                    <stop offset="100%" stopColor="#34D399" />
+                  </linearGradient>
+              
+                  {/* Pending gradient */}
+                  <linearGradient id="pendingGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#F59E0B" />
+                    <stop offset="100%" stopColor="#FBBF24" />
+                  </linearGradient>
+              
+                  {/* Rejected gradient */}
+                  <linearGradient id="rejectedGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#EF4444" />
+                    <stop offset="100%" stopColor="#F87171" />
+                  </linearGradient>
+              
+                  {/* Default gradient */}
+                  <linearGradient id="defaultGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#6B7280" />
+                    <stop offset="100%" stopColor="#9CA3AF" />
+                  </linearGradient>
+                </defs>
+
               {/* Background circle */}
               <circle
                 cx="50"
@@ -166,16 +192,16 @@ const ApprovalStatusChart = () => {
                   currentAngle += angle;
                   
                   // Define gradient colors based on status
-                  const strokeColor = item.status === 'Approved' ? '#10B981' : 
-                                   item.status === 'Pending' ? '#F59E0B' : 
-                                   item.status === 'Rejected' ? '#EF4444' : '#6B7280';
+                  const strokeColor = item.status === 'Approved' ? 'approvedGradient' : 
+                                   item.status === 'Pending' ? 'pendingGradient' : 
+                                   item.status === 'Rejected' ? 'rejectedGradient' : 'defaultGradient';
                   
                   return (
                     <path
                       key={index}
                       d={pathData}
                       fill="none"
-                      stroke={strokeColor}
+                      stroke={`url(#${strokeColor})`}
                       strokeWidth="8"
                       className="transition-all duration-300 hover:stroke-width-10"
                     />

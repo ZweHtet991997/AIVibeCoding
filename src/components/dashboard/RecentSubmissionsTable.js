@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { dashboardAPI } from '../../utils/api';
 
 const RecentSubmissionsTable = () => {
+  const navigate = useNavigate();
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -23,6 +25,11 @@ const RecentSubmissionsTable = () => {
 
     fetchData();
   }, []);
+
+  // Handle navigation to submissions screen
+  const handleViewAllSubmissions = () => {
+    navigate('/admin-dashboard', { state: { activeMenu: 'Submissions' } });
+  };
 
   const getStatusBadge = (status) => {
     const baseClasses = 'px-3 py-1 rounded-full text-xs font-medium';
@@ -154,7 +161,10 @@ const RecentSubmissionsTable = () => {
             <div className="text-sm text-gray-500 font-medium">
               Showing {submissions.length} of {submissions.length} recent submissions
             </div>
-            <button className="glass-button px-4 py-2 rounded-lg text-gray-700 hover:text-gray-900 hover:neon-soft transition-all duration-300 font-medium">
+            <button 
+              className="glass-button px-4 py-2 rounded-lg text-gray-700 hover:text-gray-900 hover:neon-soft transition-all duration-300 font-medium"
+              onClick={handleViewAllSubmissions}
+            >
               View All Submissions →
             </button>
           </div>
