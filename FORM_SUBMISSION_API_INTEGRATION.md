@@ -13,7 +13,8 @@ This document describes the implementation of form submission functionality that
 {
   "formId": 6,
   "userId": 2,
-  "responseData": "[{\"Field\":\"Employee Name\",\"Value\":\"Mg Mg\"},{\"Field\":\"Email\",\"Value\":\"mgmg@example.com\"},{\"Field\":\"City\",\"Value\":\"Yangon\"},{\"Field\":\"Join Date\",\"Value\":\"2025-08-03\"},{\"Field\":\"Profile\",\"Value\":\"base64_string\"}]"
+  "responseData": "[{\"Field\":\"Employee Name\",\"Value\":\"Mg Mg\"},{\"Field\":\"Email\",\"Value\":\"mgmg@example.com\"},{\"Field\":\"City\",\"Value\":\"Yangon\"},{\"Field\":\"Join Date\",\"Value\":\"2025-08-03\"},{\"Field\":\"Profile\",\"Value\":\"base64_string\"}]",
+  "assignedBy": 1
 }
 ```
 

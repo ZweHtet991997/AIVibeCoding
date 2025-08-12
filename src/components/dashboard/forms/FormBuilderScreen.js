@@ -196,7 +196,7 @@ const FormBuilderScreen = () => {
       const formId = `${formNameClean}${day}${month}${year}${seconds}${milliseconds}`;
     
       // Generate formUrl: {{baseFrontendUrl}}/form/fill/{formId}
-      const formUrl = `${apiConfig.frontendUrl}/form/fill/${formId}`;
+      const formUrl = `${apiConfig.frontendUrl}/form/fill-form/${formId}`;
       
       // Generate form schema with metadata
       const formSchema = {

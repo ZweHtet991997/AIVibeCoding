@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getUserId } from '../utils/auth';
 import { userFormsAPI } from '../utils/api';
 import { spamDetector } from '../utils/spamDetection';
@@ -10,6 +10,7 @@ import ErrorModal from './common/ErrorModal';
 const FormFiller = () => {
   const { formId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [formSchema, setFormSchema] = useState(null);
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
@@ -19,6 +20,9 @@ const FormFiller = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [submissionMessage, setSubmissionMessage] = useState('');
+  
+  // Get assignedBy from navigation state
+  const [assignedBy, setAssignedBy] = useState(location.state?.assignedBy);
 
   // Fetch form schema from API
   useEffect(() => {
@@ -67,6 +71,36 @@ const FormFiller = () => {
 
     fetchFormSchema();
   }, [formId]);
+
+  // Fetch assignedBy information if not available from navigation state
+  useEffect(() => {
+    const fetchAssignedBy = async () => {
+      // If assignedBy is already available from navigation state, skip fetching
+      if (assignedBy !== null && assignedBy !== undefined) {
+        return;
+      }
+
+      try {
+        const userId = getUserId();
+        if (!userId) {
+          return;
+        }
+
+        // Fetch assigned forms to get the assignedBy information
+        const assignedForms = await userFormsAPI.getAssignedForms(userId);
+        const currentForm = assignedForms.find(form => form.formId === parseInt(formId));
+        
+        if (currentForm && currentForm.assignedBy !== undefined) {
+          setAssignedBy(currentForm.assignedBy);
+        }
+      } catch (err) {
+        console.error('Error fetching assignedBy information:', err);
+        // Don't set error state as this is not critical for form functionality
+      }
+    };
+
+    fetchAssignedBy();
+  }, [formId, assignedBy]);
 
   const handleInputChange = (fieldId, value) => {
     
@@ -218,7 +252,8 @@ const FormFiller = () => {
         userId, 
         responseDataString, 
         fileToUpload, // Always pass the file if we have one, regardless of hasFileFields
-        isSpam // Pass the spam detection result
+        isSpam, // Pass the spam detection result
+        assignedBy // Pass the assignedBy information
       );
       
       // Show success message

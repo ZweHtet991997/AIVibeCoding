@@ -1,5 +1,5 @@
 import apiConfig from '../config';
-import { getToken } from './auth';
+import { getToken, getUserId } from './auth';
 
 // API service for dashboard operations
 export const dashboardAPI = {
@@ -202,6 +202,12 @@ export const formsAPI = {
         throw new Error('No authentication token found');
       }
 
+      // Get the current admin's user ID
+      const adminId = getUserId();
+      if (!adminId) {
+        throw new Error('Admin user ID not found');
+      }
+
       const response = await fetch(`${apiConfig.baseUrl}/api/v1/form/assignform`, {
         method: 'POST',
         headers: {
@@ -210,7 +216,8 @@ export const formsAPI = {
         },
         body: JSON.stringify({
           formId: formId,
-          userId: userId
+          userId: userId,
+          assignedBy: adminId
         })
       });
 
@@ -620,7 +627,7 @@ export const userFormsAPI = {
   },
 
   // Submit form response
-  async submitFormResponse(formId, userId, responseData, file = null, isSpam = false) {
+  async submitFormResponse(formId, userId, responseData, file = null, isSpam = false, assignedBy = null) {
     try {
       const token = getToken();
       if (!token) {
@@ -633,6 +640,11 @@ export const userFormsAPI = {
       formData.append('formId', formId.toString());
       formData.append('responseData', responseData);
       formData.append('IsSpam', isSpam.toString());
+      
+      // Append assignedBy if provided
+      if (assignedBy !== null && assignedBy !== undefined) {
+        formData.append('assignedBy', assignedBy.toString());
+      }
       
       // Conditionally append file if provided
       if (file) {

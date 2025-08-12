@@ -48,7 +48,13 @@ const UserHome = () => {
   };
 
   const handleFillForm = (formId) => {
-    navigate(`/fill-form/${formId}`);
+    // Find the form to get the assignedBy information
+    const form = assignedForms.find(f => f.formId === formId);
+    const assignedBy = form?.assignedBy;
+    
+    navigate(`/fill-form/${formId}`, { 
+      state: { assignedBy: assignedBy }
+    });
   };
 
   // Check if form is fillable (only Pending status)
