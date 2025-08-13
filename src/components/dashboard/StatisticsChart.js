@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { dashboardAPI } from '../../utils/api';
 
 const StatisticsChart = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [dimensions, setDimensions] = useState({ width: 700, height: 250 }); // Set initial dimensions
+  const containerRef = useRef(null);
 
   // Load dashboard data
   useEffect(() => {
@@ -24,22 +26,60 @@ const StatisticsChart = () => {
     fetchData();
   }, []);
 
+  // Handle responsive sizing
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const container = containerRef.current;
+        const rect = container.getBoundingClientRect();
+        const width = Math.max(300, rect.width - 48); // Account for padding
+        const height = Math.max(200, Math.min(300, width * 0.4)); // Responsive height
+        setDimensions({ width, height });
+      }
+    };
+
+    // Initial update
+    updateDimensions();
+
+    // Use ResizeObserver for better performance
+    let resizeObserver;
+    if (window.ResizeObserver && containerRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        updateDimensions();
+      });
+      resizeObserver.observe(containerRef.current);
+    } else {
+      // Fallback to window resize listener
+      window.addEventListener('resize', updateDimensions);
+    }
+
+    // Also update after a short delay to ensure DOM is fully rendered
+    const timeoutId = setTimeout(updateDimensions, 100);
+
+    return () => {
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      } else {
+        window.removeEventListener('resize', updateDimensions);
+      }
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
   // Chart configuration
   const chartConfig = {
-    width: 600,
-    height: 200,
     margin: { top: 20, right: 30, bottom: 60, left: 60 },
-    barWidth: 25,
+    barWidth: Math.max(15, Math.min(25, (dimensions.width - 120) / (data.length * 2 + (data.length - 1) * 0.5) / 2)),
     barGap: 8,
-    groupGap: 40,
+    groupGap: Math.max(20, Math.min(40, (dimensions.width - 120) / data.length * 0.1)),
   };
 
-  const chartWidth = chartConfig.width - chartConfig.margin.left - chartConfig.margin.right;
-  const chartHeight = chartConfig.height - chartConfig.margin.top - chartConfig.margin.bottom;
+  const chartWidth = dimensions.width - chartConfig.margin.left - chartConfig.margin.right;
+  const chartHeight = dimensions.height - chartConfig.margin.top - chartConfig.margin.bottom;
 
   // Calculate scales
   const maxValue = Math.max(...data.map(d => Math.max(d.submitted, d.notSubmitted)));
-  const yScale = maxValue > 0 ? chartHeight / (maxValue * 1.2) : chartHeight / 10; // Add 20% padding for top spacing
+  const yScale = maxValue > 0 ? chartHeight / (maxValue * 1.2) : chartHeight / 10;
   const xScale = chartWidth / (data.length * 2 + (data.length - 1) * 0.5);
 
   // Colors
@@ -53,15 +93,15 @@ const StatisticsChart = () => {
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="text-lg font-bold text-gray-800 mb-2">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-bold text-gray-800 mb-2 truncate">
               Form Submission Status by Assigned Users
             </h3>
             <p className="text-gray-600 text-sm">
               Track submission rates across different forms
             </p>
           </div>
-          <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-xl flex items-center justify-center flex-shrink-0 ml-4">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
@@ -98,9 +138,9 @@ const StatisticsChart = () => {
           <p className="text-gray-400 text-sm mt-1">Data will appear here once available</p>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-6" ref={containerRef}>
           {/* Legend */}
-          <div className="flex justify-center space-x-8">
+          <div className="flex flex-wrap justify-center gap-4 sm:gap-8">
             <div className="flex items-center space-x-2">
               <div className="w-4 h-4 rounded" style={{ background: 'linear-gradient(135deg, #654ea3, #eaafc8)' }}></div>
               <span className="text-sm font-medium text-gray-700">Submitted</span>
@@ -112,11 +152,13 @@ const StatisticsChart = () => {
           </div>
 
           {/* Chart */}
-          <div className="flex justify-center">
+          <div className="flex justify-center overflow-x-auto">
             <svg
-              width={chartConfig.width}
-              height={chartConfig.height}
+              width={dimensions.width}
+              height={dimensions.height}
+              viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
               className="overflow-visible"
+              style={{ minWidth: '300px' }}
             >
               {/* Definitions for gradients */}
               <defs>
@@ -146,9 +188,7 @@ const StatisticsChart = () => {
                 {/* Y-axis ticks and labels */}
                 {Array.from({ length: Math.max(1, Math.ceil(maxValue / 5) + 1) }, (_, i) => {
                   const value = i * 5;
-                  // Calculate y position ensuring it stays within chart bounds
                   const y = Math.max(0, chartHeight - (value * yScale));
-                  // Render ticks that are within reasonable bounds
                   if (y >= 0 && y <= chartHeight) {
                     return (
                       <g key={i}>
