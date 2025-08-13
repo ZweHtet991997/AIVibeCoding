@@ -138,7 +138,7 @@ const StatisticsChart = () => {
           <p className="text-gray-400 text-sm mt-1">Data will appear here once available</p>
         </div>
       ) : (
-        <div className="space-y-6" ref={containerRef}>
+        <div className="space-y-2" ref={containerRef}>
           {/* Legend */}
           <div className="flex flex-wrap justify-center gap-4 sm:gap-8">
             <div className="flex items-center space-x-2">
