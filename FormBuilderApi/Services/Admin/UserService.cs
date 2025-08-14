@@ -7,10 +7,12 @@ namespace FormBuilderApi.Services.Admin
     public class UserService : IUserService
     {
         private readonly AppDbContext _context;
+        private readonly IEmailService _emailService;
 
-        public UserService(AppDbContext context)
+        public UserService(AppDbContext context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         public async Task<List<UserListDto>> GetNormalUsersWithFormCountsAsync()
@@ -66,12 +68,31 @@ namespace FormBuilderApi.Services.Admin
                     FormId = dto.FormId,
                     UserId = dto.UserId,
                     ResponseData = dto.ResponseData,
+                    IsSpam = dto.IsSpam,
                     FilePath = filePath,
                     ResponseDate = DateConvertService.GetCurrentMyanmarDateTime()
                 };
 
                 _context.FormResponse.Add(formResponse);
                 await _context.SaveChangesAsync();
+
+                // Send email to all admin users
+                var adminInfo = await _context.UserTable
+                    .Where(u => u.UserId == dto.AssignedBy).FirstOrDefaultAsync();
+
+                var user = await _context.UserTable.FirstOrDefaultAsync(u => u.UserId == dto.UserId);
+                var form = await _context.FormTable.FirstOrDefaultAsync(f => f.FormId == dto.FormId);
+
+                if (user != null && form != null)
+                {
+                    await _emailService.SendFormSubmittedEmailAsync(
+                            adminInfo.Email,
+                            adminInfo.UserName,
+                            user.UserName,
+                            user.Email,
+                            form.FormName
+                        );
+                }
                 return true;
             }
             catch
@@ -93,6 +114,7 @@ namespace FormBuilderApi.Services.Admin
                             FormName = form.FormName,
                             Description = form.Description,
                             Url = $"/forms/{form.FormId}", // You can customize this URL format
+                            AssignedBy = assignment.AssignedBy,
                             AssignedDate = assignment.AssignedAt,
                             SubmissionStatus = _context.FormResponse
                                 .Any(r => r.FormId == form.FormId && r.UserId == userId) ? "Complete" : "Pending"

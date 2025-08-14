@@ -9,7 +9,7 @@ namespace FormBuilderApi.Services.Admin
         Task<bool> ActivateFormAsync(int formId);
         Task<FormResponseApproval> ApproveOrRejectAsync(FormResponseApprovalRequestDto dto);
         Task<FormAssignment> AssignFormAsync(FormAssignmentRequestDto dto);
-        Task<List<FormResponseListItemDto>> GetAllResponsesWithStatusAsync();
+        Task<List<FormResponseListItemDto>> GetAllResponsesWithStatusAsync(bool isSpam);
         Task<List<FormListDto>> GetFormsWithSubmissionCountsAsync();
         Task<List<FormAssignmentListDto>> GetUsersAssignedToFormAsync(int formId);
         Task<bool> RemoveAssignmentAsync(int formId, int userId);

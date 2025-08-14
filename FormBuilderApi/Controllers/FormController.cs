@@ -106,9 +106,9 @@ namespace FormBuilderApi.Controllers
         }
 
         [HttpGet("formresponse")]
-        public async Task<IActionResult> GetAllResponses()
+        public async Task<IActionResult> GetAllResponses(bool isSpam)
         {
-            var list = await _formService.GetAllResponsesWithStatusAsync();
+            var list = await _formService.GetAllResponsesWithStatusAsync(isSpam);
             return Ok(list);
         }
 
@@ -133,7 +133,7 @@ namespace FormBuilderApi.Controllers
             if (!result)
                 return NotFound(new { message = "Assignment not found." });
 
-            return NoContent();
+            return Ok();
         }
     }
 

@@ -24,6 +24,7 @@
         public string Description { get; set; }
         public string Url { get; set; }
         public DateTime AssignedDate { get; set; }
+        public int AssignedBy { get; set; }
         public string SubmissionStatus { get; set; } // "Submitted", "Not Submitted"
     }
 

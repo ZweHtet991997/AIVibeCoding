@@ -4,6 +4,8 @@ using FormBuilderApi.Services;
 using FormBuilderApi.Services.Admin;
 using FormBuilderApi.Services.AuthServices;
 using FormBuilderApi.Services.Dashboard;
+using FormBuilderApi.Services.Common;
+using FormBuilderApi.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -18,13 +20,14 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Register configuration service
+builder.Services.AddScoped<IConfigurationService, ConfigurationService>();
+
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
-
+// Register JWT authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -32,24 +35,32 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
+    // Configure JWT validation parameters
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings.Issuer,
-        ValidAudience = jwtSettings.Audience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key))
+        ValidIssuer = "https://api.bimgoc.com",
+        ValidAudience = "https://app.bimgoc.com",
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("p7v9y$B&E)H@McQfTjWnZr4u7x!A%D*G"))
     };
 });
 
+// Register application services
+builder.Services.AddScoped<IPasswordService, PasswordService>();
+builder.Services.AddScoped<IPasswordMigrationService, PasswordMigrationService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IFormService, FormService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAesEncryptionService, AesEncryptionService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+
+// Register validation and exception handling services
+builder.Services.AddScoped<IInputValidationService, InputValidationService>();
+builder.Services.AddScoped<ICustomExceptionHandler, CustomExceptionHandler>();
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -74,6 +85,9 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
+
+// Add global exception handling middleware
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 app.UseAuthentication();
 

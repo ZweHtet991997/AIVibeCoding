@@ -6,12 +6,12 @@ namespace FormBuilderApi.Services
 {
     public class EmailService : IEmailService
     {
-        private readonly EmailSettings _emailSettings;
+        private readonly IConfigurationService _configurationService;
         private readonly ILogger<EmailService> _logger;
 
-        public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
+        public EmailService(IConfigurationService configurationService, ILogger<EmailService> logger)
         {
-            _emailSettings = configuration.GetSection("EmailSettings").Get<EmailSettings>();
+            _configurationService = configurationService;
             _logger = logger;
         }
 
@@ -19,9 +19,11 @@ namespace FormBuilderApi.Services
         {
             try
             {
+                var emailSettings = _configurationService.GetEmailSettings();
+                
                 var mailMessage = new MailMessage
                 {
-                    From = new MailAddress(_emailSettings.FromEmail, _emailSettings.FromName),
+                    From = new MailAddress(emailSettings.FromEmail, emailSettings.FromName),
                     Subject = GetEmailSubject(emailRequest.EmailType),
                     Body = GetEmailBody(emailRequest),
                     IsBodyHtml = true
@@ -29,10 +31,10 @@ namespace FormBuilderApi.Services
 
                 mailMessage.To.Add(new MailAddress(emailRequest.ToEmail, emailRequest.ToName));
 
-                using (var smtpClient = new SmtpClient(_emailSettings.SmtpServer, _emailSettings.SmtpPort))
+                using (var smtpClient = new SmtpClient(emailSettings.SmtpServer, emailSettings.SmtpPort))
                 {
-                    smtpClient.Credentials = new NetworkCredential(_emailSettings.SmtpUsername, _emailSettings.SmtpPassword);
-                    smtpClient.EnableSsl = _emailSettings.EnableSsl;
+                    smtpClient.Credentials = new NetworkCredential(emailSettings.SmtpUsername, emailSettings.SmtpPassword);
+                    smtpClient.EnableSsl = emailSettings.EnableSsl;
 
                     await smtpClient.SendMailAsync(mailMessage);
                 }
