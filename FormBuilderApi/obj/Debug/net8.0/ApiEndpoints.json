@@ -132,7 +132,7 @@
   {
     "ContainingType": "FormBuilderApi.Controllers.FormController",
     "Method": "ApproveOrReject",
-    "RelativePath": "api/v1/form/approve-reject",
+    "RelativePath": "api/v1/form/approval",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -194,7 +194,13 @@
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "isSpam",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      }
+    ],
     "ReturnTypes": []
   },
   {
@@ -221,7 +227,7 @@
   {
     "ContainingType": "FormBuilderApi.Controllers.UserController",
     "Method": "GetUserAssignedForms",
-    "RelativePath": "api/v1/user/assigned/{userId}",
+    "RelativePath": "api/v1/user/assigned",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -229,23 +235,74 @@
       {
         "Name": "userId",
         "Type": "System.Int32",
-        "IsRequired": true
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []
   },
   {
     "ContainingType": "FormBuilderApi.Controllers.UserController",
-    "Method": "GetUserSubmittedResponses",
-    "RelativePath": "api/v1/user/submitted/{userId}",
-    "HttpMethod": "GET",
+    "Method": "GetAssignedFormDetails",
+    "RelativePath": "api/v1/user/form-details",
+    "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "userId",
-        "Type": "System.Int32",
+        "Name": "model",
+        "Type": "FormBuilderApi.Models.UserAssignedFormRequestModel",
         "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "FormBuilderApi.Models.UserAssignedFormDetailsDto",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "FormBuilderApi.Controllers.UserController",
+    "Method": "SubmitFormResponse",
+    "RelativePath": "api/v1/user/submitresponse",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "FormId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "UserId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "ResponseData",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "AssignedBy",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "IsSpam",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      },
+      {
+        "Name": "ResponseFile",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []

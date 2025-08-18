@@ -261,7 +261,7 @@
         }
       }
     },
-    "/api/v1/form/approve-reject": {
+    "/api/v1/form/approval": {
       "post": {
         "tags": [
           "Form"
@@ -296,6 +296,15 @@
       "get": {
         "tags": [
           "Form"
+        ],
+        "parameters": [
+          {
+            "name": "isSpam",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -365,7 +374,72 @@
         }
       }
     },
-    "/api/v1/user/assigned/{userId}": {
+    "/api/v1/user/submitresponse": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "FormId": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "UserId": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "ResponseData": {
+                    "type": "string"
+                  },
+                  "AssignedBy": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "IsSpam": {
+                    "type": "boolean"
+                  },
+                  "ResponseFile": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "FormId": {
+                  "style": "form"
+                },
+                "UserId": {
+                  "style": "form"
+                },
+                "ResponseData": {
+                  "style": "form"
+                },
+                "AssignedBy": {
+                  "style": "form"
+                },
+                "IsSpam": {
+                  "style": "form"
+                },
+                "ResponseFile": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/user/assigned": {
       "get": {
         "tags": [
           "User"
@@ -373,8 +447,7 @@
         "parameters": [
           {
             "name": "userId",
-            "in": "path",
-            "required": true,
+            "in": "query",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -388,25 +461,50 @@
         }
       }
     },
-    "/api/v1/user/submitted/{userId}": {
-      "get": {
+    "/api/v1/user/form-details": {
+      "post": {
         "tags": [
           "User"
         ],
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAssignedFormRequestModel"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAssignedFormRequestModel"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAssignedFormRequestModel"
+              }
             }
           }
-        ],
+        },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserAssignedFormDetailsDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserAssignedFormDetailsDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserAssignedFormDetailsDto"
+                }
+              }
+            }
           }
         }
       }
@@ -605,6 +703,10 @@
           "userId": {
             "type": "integer",
             "format": "int32"
+          },
+          "assignedBy": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -623,6 +725,10 @@
           "comment": {
             "type": "string",
             "nullable": true
+          },
+          "approvedBy": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -673,6 +779,42 @@
           "approvalStatus": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserAssignedFormDetailsDto": {
+        "type": "object",
+        "properties": {
+          "formId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "formName": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "formSchema": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserAssignedFormRequestModel": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "formId": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
