@@ -17,7 +17,7 @@ namespace FormBuilderApi.Controllers
         }
 
         [HttpPost("submitresponse")]
-        public async Task<IActionResult> SubmitFormResponse([FromForm] SubmitFormResponseDto dto)
+        public async Task<IActionResult> SubmitFormResponse([FromForm] SubmitFormRequestDto dto)
         {
             var result = await _userService.SubmitFormResponseAsync(dto);
             if (!result)

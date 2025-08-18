@@ -24,7 +24,7 @@ namespace FormBuilderApi.Services.Dashboard
                 var totalSubmissionsReceived = _context.FormResponse.Count();
 
                 // Approval status counts
-                var totalPending = _context.FormResponseApproval.Count(a => a.Status == "Pending");
+                var totalPending = _context.FormResponse.Count(fr => !_context.FormResponseApproval.Any(fra => fra.ResponseId == fr.ResponseId));
                 var totalApproved = _context.FormResponseApproval.Count(a => a.Status == "Approved");
                 var totalRejected = _context.FormResponseApproval.Count(a => a.Status == "Rejected");
 
@@ -137,6 +137,7 @@ namespace FormBuilderApi.Services.Dashboard
                         join approval in _context.FormResponseApproval
                             on response.ResponseId equals approval.ResponseId into approvalGroup
                         from approval in approvalGroup.DefaultIfEmpty()
+                        where !response.IsSpam
                         orderby response.ResponseDate descending
                         select new TopFormResponsesDto
                         {

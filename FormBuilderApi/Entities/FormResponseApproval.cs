@@ -17,6 +17,7 @@ namespace FormBuilderApi.Entities
         public string Status { get; set; }
 
         public string? Comment { get; set; }
+        public int ApprovedBy { get; set; }
 
         public DateTime? DecisionDate { get; set; }
     }

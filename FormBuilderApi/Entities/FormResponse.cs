@@ -20,5 +20,6 @@ namespace FormBuilderApi.Entities
 
         [Required]
         public DateTime ResponseDate { get; set; }
+        public bool IsSpam { get; set; }
     }
 }

@@ -17,5 +17,6 @@ namespace FormBuilderApi.Entities
 
         [Required]
         public DateTime AssignedAt { get; set; }
+        public int AssignedBy { get; set; }
     }
 }

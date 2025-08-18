@@ -136,6 +136,7 @@ namespace FormBuilderApi.Services.Admin
             {
                 FormId = dto.FormId,
                 UserId = dto.UserId,
+                AssignedBy = dto.AssignedBy,//current logined user Id (Admin role)
                 AssignedAt = DateConvertService.GetCurrentMyanmarDateTime()
             };
 
@@ -183,6 +184,7 @@ namespace FormBuilderApi.Services.Admin
                     // Update existing approval
                     existing.Status = dto.Status;
                     existing.Comment = dto.Comment;
+                    existing.ApprovedBy = dto.ApprovedBy;
                     existing.DecisionDate = DateTime.UtcNow;
                 }
                 else
@@ -193,12 +195,35 @@ namespace FormBuilderApi.Services.Admin
                         ResponseId = dto.ResponseId,
                         Status = dto.Status,
                         Comment = dto.Comment,
+                        ApprovedBy = dto.ApprovedBy,
                         DecisionDate = DateConvertService.GetCurrentMyanmarDateTime()
                     };
                     _context.FormResponseApproval.Add(existing);
                 }
 
                 await _context.SaveChangesAsync();
+
+                // Fetch user and form details for email
+                var response = await _context.FormResponse.FirstOrDefaultAsync(r => r.ResponseId == dto.ResponseId);
+                if (response != null)
+                {
+                    var user = await _context.UserTable.FirstOrDefaultAsync(u => u.UserId == response.UserId);
+                    var form = await _context.FormTable.FirstOrDefaultAsync(f => f.FormId == response.FormId);
+                    var admin = await _context.UserTable.FirstOrDefaultAsync(u => u.UserId == dto.ApprovedBy);
+
+                    if (user != null && form != null && admin != null)
+                    {
+                        bool isApproved = dto.Status == "Approved";
+                        await _emailService.SendFormApprovalEmailAsync(
+                            user.Email,
+                            user.UserName,
+                            admin.UserName,
+                            form.FormName,
+                            dto.Comment,
+                            isApproved
+                        );
+                    }
+                }
                 return existing;
             }
             catch (Exception ex)
@@ -208,7 +233,7 @@ namespace FormBuilderApi.Services.Admin
         }
 
         // Get All Responses with Status
-        public async Task<List<FormResponseListItemDto>> GetAllResponsesWithStatusAsync()
+        public async Task<List<FormResponseListItemDto>> GetAllResponsesWithStatusAsync(bool isSpam)
         {
             var query = from response in _context.FormResponse
                         join user in _context.UserTable on response.UserId equals user.UserId
@@ -217,6 +242,7 @@ namespace FormBuilderApi.Services.Admin
                         join approval in _context.FormResponseApproval
                             on response.ResponseId equals approval.ResponseId into approvalGroup
                         from approval in approvalGroup.DefaultIfEmpty()
+                        where response.IsSpam == isSpam
                         select new FormResponseListItemDto
                         {
                             ResponseId = response.ResponseId,

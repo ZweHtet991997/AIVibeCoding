@@ -13,7 +13,8 @@
         FormAssigned,
         FormSubmitted,
         FormApproved,
-        FormRejected
+        FormRejected,
+        FormApprovalDecision
     }
 
     public class EmailSettings
