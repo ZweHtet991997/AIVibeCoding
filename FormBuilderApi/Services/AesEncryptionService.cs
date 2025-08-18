@@ -6,12 +6,11 @@ namespace FormBuilderApi.Services
     public class AesEncryptionService : IAesEncryptionService
     {
         private readonly string _key;
-        private readonly string _iv;
 
-        public AesEncryptionService(IConfiguration configuration)
+        public AesEncryptionService(IConfigurationService configurationService)
         {
-            // Get encryption key from configuration
-            _key = configuration["Encryption:Key"] ?? throw new ArgumentNullException("Encryption:Key not found in configuration");
+            // Get encryption key from configuration service
+            _key = configurationService.GetEncryptionKey() ?? throw new ArgumentNullException("Encryption key not found in configuration");
         }
 
         public string Encrypt(string plainText)

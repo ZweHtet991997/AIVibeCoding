@@ -133,7 +133,7 @@ namespace FormBuilderApi.Controllers
             if (!result)
                 return NotFound(new { message = "Assignment not found." });
 
-            return NoContent();
+            return Ok();
         }
     }
 

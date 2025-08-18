@@ -93,7 +93,6 @@ namespace FormBuilderApi.Services.Admin
                             form.FormName
                         );
                 }
-
                 return true;
             }
             catch

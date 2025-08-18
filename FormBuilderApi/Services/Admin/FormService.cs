@@ -1,5 +1,6 @@
 ﻿using FormBuilderApi.Entities;
 using FormBuilderApi.Models;
+using FormBuilderApi.Services.Common;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -14,41 +15,75 @@ namespace FormBuilderApi.Services.Admin
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
+        private readonly IInputValidationService _validationService;
+        private readonly ICustomExceptionHandler _exceptionHandler;
+        private readonly ILogger<FormService> _logger;
 
-        public FormService(AppDbContext context, IConfiguration configuration, IEmailService emailService)
+        public FormService(
+            AppDbContext context,
+            IConfiguration configuration,
+            IEmailService emailService,
+            IInputValidationService validationService,
+            ICustomExceptionHandler exceptionHandler,
+            ILogger<FormService> logger)
         {
             _context = context;
             _configuration = configuration;
             _httpClient = new HttpClient();
             _emailService = emailService;
+            _validationService = validationService;
+            _exceptionHandler = exceptionHandler;
+            _logger = logger;
         }
 
         //Create Form
         public async Task<FormTable> CreateFormAsync(CreateFormRequestDto dto)
         {
-            // Only duplicate validation for form name (case-insensitive)
-            var existingForm = await _context.FormTable
-                .FirstOrDefaultAsync(f => f.FormName.ToLower() == dto.FormName.ToLower());
-
-            if (existingForm != null)
+            try
             {
-                throw new InvalidOperationException($"A form with the name '{dto.FormName}' already exists.");
+                // Input validation
+                var formNameValidation = _validationService.ValidateFormName(dto.FormName);
+                if (!formNameValidation.IsValid)
+                {
+                    throw _exceptionHandler.HandleValidationException("FormName", formNameValidation.ErrorMessage);
+                }
+
+                var formSchemaValidation = _validationService.ValidateFormSchema(dto.FormSchema);
+                if (!formSchemaValidation.IsValid)
+                {
+                    throw _exceptionHandler.HandleValidationException("FormSchema", formSchemaValidation.ErrorMessage);
+                }
+
+                // Check for duplicate form name (case-insensitive)
+                var existingForm = await _context.FormTable
+                    .FirstOrDefaultAsync(f => f.FormName.ToLower() == dto.FormName.ToLower());
+
+                if (existingForm != null)
+                {
+                    throw _exceptionHandler.HandleBusinessRuleException("Form Name Uniqueness",
+                        $"A form with the name '{dto.FormName}' already exists.");
+                }
+
+                // Create and save the form
+                var form = new FormTable
+                {
+                    FormName = dto.FormName,
+                    FormSchema = dto.FormSchema,
+                    CreatedDate = DateConvertService.GetCurrentMyanmarDateTime(),
+                    Status = "Draft", // default status
+                    FormUrl = dto.FormUrl
+                };
+
+                _context.FormTable.Add(form);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Form '{dto.FormName}' created successfully with ID: {form.FormId}");
+                return form;
             }
-
-            // Create and save the form
-            var form = new FormTable
+            catch (Exception ex) when (ex is not InvalidOperationException && ex is not ArgumentException)
             {
-                FormName = dto.FormName,
-                FormSchema = dto.FormSchema,
-                CreatedDate = DateConvertService.GetCurrentMyanmarDateTime(),
-                Status = "Draft", // default status
-                FormUrl = dto.FormUrl
-            };
-
-            _context.FormTable.Add(form);
-            await _context.SaveChangesAsync();
-
-            return form;
+                throw _exceptionHandler.HandleDatabaseException(ex, "form creation");
+            }
         }
 
         //Update Forma Status
@@ -60,22 +95,20 @@ namespace FormBuilderApi.Services.Admin
 
                 if (form == null)
                 {
-                    return false; // Form not found
+                    return false;
                 }
-
-                // Only allow Draft to Active transition
                 if (form.Status != "Draft")
                 {
-                    return false; // Form is not in Draft status
+                    return false;
                 }
 
                 form.Status = "Active";
                 await _context.SaveChangesAsync();
-                return true; // Success
+                return true;
             }
             catch
             {
-                return false; // Error occurred
+                return false;
             }
         }
 
@@ -94,7 +127,7 @@ namespace FormBuilderApi.Services.Admin
                         .Select(fr => fr.ResponseId)
                         .Distinct()
                         .Count()
-                })
+                }).OrderByDescending(f => f.FormId)
                 .ToListAsync();
 
             return forms;
@@ -124,36 +157,67 @@ namespace FormBuilderApi.Services.Admin
             return assignments;
         }
 
-        //Assg Form to User
+        //Assign Form to User
         public async Task<FormAssignment> AssignFormAsync(FormAssignmentRequestDto dto)
         {
-            // Optional: Check if assignment already exists
-            var exists = _context.FormAssignment.Any(a => a.FormId == dto.FormId && a.UserId == dto.UserId);
-            if (exists)
-                throw new InvalidOperationException("This form is already assigned to the user.");
-
-            var assignment = new FormAssignment
+            try
             {
-                FormId = dto.FormId,
-                UserId = dto.UserId,
-                AssignedBy = dto.AssignedBy,//current logined user Id (Admin role)
-                AssignedAt = DateConvertService.GetCurrentMyanmarDateTime()
-            };
+                // Input validation
+                var assignmentValidation = _validationService.ValidateFormAssignment(dto.FormId, dto.UserId);
+                if (!assignmentValidation.IsValid)
+                {
+                    throw _exceptionHandler.HandleValidationException("FormAssignment", assignmentValidation.ErrorMessage);
+                }
 
-            _context.FormAssignment.Add(assignment);
-            await _context.SaveChangesAsync();
+                // Check if form exists
+                var form = await _context.FormTable.FindAsync(dto.FormId);
+                if (form == null)
+                {
+                    throw _exceptionHandler.HandleNotFoundException("Form", dto.FormId.ToString());
+                }
 
-            // Fetch user and form details for email
-            var user = await _context.UserTable.FirstOrDefaultAsync(u => u.UserId == dto.UserId);
-            var form = await _context.FormTable.FirstOrDefaultAsync(f => f.FormId == dto.FormId);
+                // Check if user exists
+                var user = await _context.UserTable.FindAsync(dto.UserId);
+                if (user == null)
+                {
+                    throw _exceptionHandler.HandleNotFoundException("User", dto.UserId.ToString());
+                }
 
-            if (user != null && form != null)
-            {
-                var formUrl = form.FormUrl ?? $"/forms/{form.FormId}";
-                await _emailService.SendFormAssignedEmailAsync(user.Email, user.UserName, form.FormName, formUrl);
+                // Check if assignment already exists
+                var exists = await _context.FormAssignment
+                    .AnyAsync(a => a.FormId == dto.FormId && a.UserId == dto.UserId);
+
+                if (exists)
+                {
+                    throw _exceptionHandler.HandleBusinessRuleException("Assignment Uniqueness",
+                        "This form is already assigned to the user.");
+                }
+
+                var assignment = new FormAssignment
+                {
+                    FormId = dto.FormId,
+                    UserId = dto.UserId,
+                    AssignedBy = dto.AssignedBy,//current logined user Id (Admin role)
+                    AssignedAt = DateConvertService.GetCurrentMyanmarDateTime()
+                };
+
+                _context.FormAssignment.Add(assignment);
+                await _context.SaveChangesAsync();
+
+                // Send email notification
+                if (user != null && form != null)
+                {
+                    var formUrl = form.FormUrl ?? $"/forms/{form.FormId}";
+                    await _emailService.SendFormAssignedEmailAsync(user.Email, user.UserName, form.FormName, formUrl);
+                }
+
+                _logger.LogInformation($"Form '{form?.FormName}' assigned to user '{user?.UserName}' successfully");
+                return assignment;
             }
-
-            return assignment;
+            catch (Exception ex) when (ex is not InvalidOperationException && ex is not ArgumentException && ex is not KeyNotFoundException)
+            {
+                throw _exceptionHandler.HandleDatabaseException(ex, "form assignment");
+            }
         }
 
         // Remove Form Assignment
