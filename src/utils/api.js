@@ -399,15 +399,16 @@ export const approvalsAPI = {
       if (isNaN(numericResponseId)) {
         throw new Error('Response ID must be a valid number');
       }
-      
-      if (!status || !['Approved', 'Rejected'].includes(status)) {
-        throw new Error('Status must be either "Approved" or "Rejected"');
-      }
+
+      // Get current admin user id
+      const adminId = getUserId();
+      const numericAdminId = parseInt(adminId);
 
       // Prepare request payload
       const requestPayload = {
         responseId: numericResponseId,
         status: status,
+        approvedBy: numericAdminId,
         comment: comment || ''
       };
 
@@ -415,6 +416,7 @@ export const approvalsAPI = {
       const alternativePayload = {
         responseId: numericResponseId,
         status: status,
+        approvedBy: numericAdminId,
         comment: comment || '',
         timestamp: new Date().toISOString()
       };
